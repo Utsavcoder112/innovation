@@ -1,0 +1,111 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  body {
+    background-color: #dff7f8;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .register-box {
+    background-color: #dde3fb;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    text-align: center;
+  }
+  
+  .register-box h2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #c4c7dc;
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.1);
+    outline: none;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #5dd0d8;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #3dc0c8;
+  }
+  
+  .login {
+    margin-top: 20px;
+    font-size: 0.9em;
+  }
+  
+  .login a {
+    color: #6c4f3d;
+    text-decoration: none;
+  }
+  
+  .home-link {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #4b3e1e;
+  }
+  
+  .home-link a {
+    text-decoration: none;
+    color: #4b3e1e;
+  }
+  
+  .home-icon {
+    margin-right: 5px;
+  }
+  
+
+  .error-message {
+    color: #ff0000;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.success-message {
+    color: green;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+    font-weight: bold;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

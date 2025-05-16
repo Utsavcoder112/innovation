@@ -1,0 +1,192 @@
+.request-confirmation-modal .modal-content {
+    max-width: 500px;
+}
+
+.request-form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #444;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.cancel-btn {
+    padding: 8px 16px;
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 4px;
+    color: #555;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.confirm-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.confirm-btn:hover {
+    background-color: #43a047;
+}
+
+.confirm-btn:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 350px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slide-in 0.3s ease-out forwards;
+}
+
+.notification.fade-out {
+    animation: fade-out 0.5s ease-out forwards;
+}
+
+.notification-content {
+    display: flex;
+    padding: 15px;
+}
+
+.notification-icon {
+    margin-right: 15px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.notification.success .notification-icon {
+    color: #4CAF50;
+}
+
+.notification.info .notification-icon {
+    color: #2196F3;
+}
+
+.notification.warning .notification-icon {
+    color: #FFC107;
+}
+
+.notification.error .notification-icon {
+    color: #F44336;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-text h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.notification-text p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+    margin-left: 5px;
+    align-self: flex-start;
+}
+
+.notification-close:hover {
+    color: #666;
+}
+
+/* Animations */
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Update existing card button styles */
+.request-btn {
+    background-color: #ff8833;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-left: 8px;
+}
+
+.request-btn:hover {
+    background-color: #e67421;
+}

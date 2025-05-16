@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annadan - Donor Dashboard</title>
+    <link rel="stylesheet" href="donar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                Annadan
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-home"></i> Dashboard</a>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
+                    <div class="dropdown-menu">
+                        <a href="../form.html">Add Food</a>
+                        <a href="#">Manage Listings</a>
+                        <a href="#">Food History</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
+                    <div class="dropdown-menu">
+                        <a href="#">New Requests</a>
+                        <a href="#">Completed</a>
+                        <a href="#">Rejected</a>
+                        <a href="#">All Requests</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="../form.html" class="action-btn donate-btn"><i class="fas fa-plus-circle"></i> Donate Food</a>
+                <a href="../viewfood.html" class="action-btn request-btn"><i class="fas fa-hand-holding"></i> Request Food</a>
+                <a href="../viewfood.html" class="action-btn view-btn"><i class="fas fa-list-alt"></i> View All Foods</a>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" placeholder="Search foods...">
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">John Donor</div>
+                    <div class="user-role">Food Provider</div>
+                </div>
+                <i class="fas fa-ellipsis-v" style="color: rgba(255, 255, 255, 0.5); cursor: pointer;"></i>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="navbar">
+                <div class="page-title">Donor Dashboard</div>
+                <div class="navbar-right">
+                    <ul>
+                        <li><a href="../home.html">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Help Center</a></li>
+                    </ul>
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="notification-icon">
+                        <i class="fas fa-envelope"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Statistics Cards -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Total Listed Food</div>
+                            <div class="stat-icon red">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i> 25% from last week
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Food Requests</div>
+                            <div class="stat-icon blue">
+                                <i class="fas fa-hand-holding-heart"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i> 12% from last week
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Completed Requests</div>
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">5</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i> 18% from last week
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Impact (Meals)</div>
+                            <div class="stat-icon orange">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">27</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i> 20% from last week
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Latest Food Listings -->
+                <div class="section-title">
+                    Latest Listed Food
+                    <a href="#" class="view-all-link">View All</a>
+                </div>
+                
+                <div class="food-listings">
+                    <div class="food-card">
+                        <img src="/api/placeholder/400/200" alt="Fresh Vegetables" class="food-image">
+                        <div class="food-details">
+                            <div class="food-name">Fresh Vegetable Bundle</div>
+                            <div class="food-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> Downtown</span>
+                                <span><i class="fas fa-clock"></i> Today</span>
+                            </div>
+                            <div class="food-description">
+                                A bundle of fresh vegetables including carrots, tomatoes, and leafy greens. Perfect for a family meal.
+                            </div>
+                            <div class="food-footer">
+                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 3 days</span>
+                                <a href="#" class="food-action">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="food-card">
+                        <img src="/api/placeholder/400/200" alt="Bread and Pastries" class="food-image">
+                        <div class="food-details">
+                            <div class="food-name">Bakery Goods</div>
+                            <div class="food-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> Westside</span>
+                                <span><i class="fas fa-clock"></i> Yesterday</span>
+                            </div>
+                            <div class="food-description">
+                                Assorted bread and pastries from local bakery. Still fresh and delicious!
+                            </div>
+                            <div class="food-footer">
+                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires tomorrow</span>
+                                <a href="#" class="food-action">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="food-card">
+                        <img src="/api/placeholder/400/200" alt="Canned Goods" class="food-image">
+                        <div class="food-details">
+                            <div class="food-name">Canned Food Package</div>
+                            <div class="food-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> Eastside</span>
+                                <span><i class="fas fa-clock"></i> 2 days ago</span>
+                            </div>
+                            <div class="food-description">
+                                Variety of canned foods including beans, soup, and vegetables. Long shelf life.
+                            </div>
+                            <div class="food-footer">
+                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 6 months</span>
+                                <a href="#" class="food-action">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="food-card">
+                        <img src="/api/placeholder/400/200" alt="Fruit Basket" class="food-image">
+                        <div class="food-details">
+                            <div class="food-name">Fresh Fruit Basket</div>
+                            <div class="food-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> North Area</span>
+                                <span><i class="fas fa-clock"></i> Today</span>
+                            </div>
+                            <div class="food-description">
+                                Seasonal fruits including apples, oranges, and bananas. Great source of vitamins.
+                            </div>
+                            <div class="food-footer">
+                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 5 days</span>
+                                <a href="#" class="food-action">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-logo">Annadan</div>
+                    <div class="footer-links">
+                        <a href="#">About Us</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
+                        <a href="#">FAQ</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <script>
+        // Toggle dropdown menus
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.parentElement;
+                    parent.classList.toggle('active');
+                    
+                    // Display dropdown menu
+                    const menu = this.nextElementSibling;
+                    if (menu.style.display === 'block') {
+                        menu.style.display = 'none';
+                    } else {
+                        menu.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="register-box">
+            <h2>CREATE ACCOUNT</h2>
+            <form id="registrationForm">
+                <input type="text" id="fullName" name="full_name" placeholder="Full Name" required>
+                <div class="error-message" id="fullNameError"></div>
+                
+                <input type="email" id="email" name="email" placeholder="Email" required>
+                <div class="error-message" id="emailError"></div>
+                
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <div class="error-message" id="passwordError"></div>
+                
+                <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
+                <div class="error-message" id="confirmPasswordError"></div>
+                
+                <button type="submit" id="registerBtn">REGISTER</button>
+                <div class="success-message" id="successMessage">Registration successful! Redirecting to login...</div>
+            </form>
+            
+            <p class="login">
+                Already have an account? <a href="./signin.html">Sign In</a>
+            </p>
+            
+            <p class="home-link">
+                <a href="./home.html"><i class="fas fa-home"></i> Home Page</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            // Make sure this URL matches your actual backend server address and port
+            const API_URL = 'http://127.0.0.1:8000';
+            
+            // Form validation and submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Reset error messages
+                document.querySelectorAll('.error-message').forEach(elem => {
+                    elem.style.display = 'none';
+                });
+                
+                // Get form values
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Basic validation
+                let isValid = true;
+                
+                // Full name validation
+                if (fullName.split(' ').length < 2) {
+                    document.getElementById('fullNameError').textContent = 'Please enter your full name (first and last name)';
+                    document.getElementById('fullNameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                    document.getElementById('emailError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Password validation
+                if (password.length < 8) {
+                    document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
+                    document.getElementById('passwordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Confirm password validation
+                if (password !== confirmPassword) {
+                    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                    document.getElementById('confirmPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    try {
+                        // Disable register button during API call
+                        document.getElementById('registerBtn').disabled = true;
+                        
+                        // Create form data object
+                        const formData = new FormData();
+                        formData.append('full_name', fullName);
+                        formData.append('email', email);
+                        formData.append('password', password);
+                        formData.append('confirm_password', confirmPassword);
+                        
+                        console.log('Sending request to:', `${API_URL}/register`);
+                        
+                        // Make API request
+                        const response = await fetch(`${API_URL}/register`, {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        
+                        console.log('Response status:', response.status);
+                        
+                        if (response.status === 404) {
+                            alert('API endpoint not found. Make sure your backend server is running on the correct port.');
+                            return;
+                        }
+                        
+                        // Parse response
+                        const data = await response.json();
+                        console.log('Response data:', data);
+                        
+                        if (response.ok) {
+                            // Show success message
+                            document.getElementById('successMessage').style.display = 'block';
+                            
+                            // Clear form
+                            form.reset();
+                            
+                            // Redirect to login page after 2 seconds
+                            setTimeout(() => {
+                                window.location.href = './signin.html';
+                            }, 2000);
+                        } else {
+                            // Handle API error
+                            if (data.detail) {
+                                if (data.detail.includes('Email already registered')) {
+                                    document.getElementById('emailError').textContent = 'Email already registered';
+                                    document.getElementById('emailError').style.display = 'block';
+                                } else if (data.detail.includes('password')) {
+                                    document.getElementById('passwordError').textContent = data.detail;
+                                    document.getElementById('passwordError').style.display = 'block';
+                                } else if (data.detail.includes('name')) {
+                                    document.getElementById('fullNameError').textContent = data.detail;
+                                    document.getElementById('fullNameError').style.display = 'block';
+                                } else {
+                                    alert('Registration error: ' + data.detail);
+                                }
+                            } else {
+                                alert('An unexpected error occurred. Please try again.');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Connection error. Please check if the server is running.');
+                    } finally {
+                        // Re-enable register button
+                        document.getElementById('registerBtn').disabled = false;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

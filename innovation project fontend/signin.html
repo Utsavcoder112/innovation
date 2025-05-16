@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In</title>
+  <link rel="stylesheet" href="signin.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Adding error message and success message styles */
+    .error-message {
+      color: #ff0000;
+      font-size: 14px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      display: none;
+      text-align: left;
+    }
+    
+    .success-message {
+      color: green;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+      font-weight: bold;
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    button a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .home-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-box">
+      <h2>SIGN IN NOW</h2>
+      <form id="signinForm">
+        <input type="email" id="email" name="username" placeholder="Email" required />
+        <div class="error-message" id="emailError"></div>
+        
+        <input type="password" id="password" name="password" placeholder="Password" required />
+        <div class="error-message" id="passwordError"></div>
+        
+        <p class="forgot">Forgot Password ?</p>
+        
+        <button type="submit" id="signinBtn">SIGN IN</button>
+        <div class="success-message" id="successMessage">Login successful! Redirecting...</div>
+        
+        <p class="register">
+          Don't Have an Account ?
+          <a href="./register.html">Create an Account</a>
+        </p>
+        
+        <p class="home-link">
+          <a href="./home.html"><i class="fas fa-home"></i> Home Page</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('signinForm');
+      // Make sure this URL matches your actual backend server address and port
+      const API_URL = 'http://127.0.0.1:8000';
+      
+      // Form validation and submission
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Reset error messages
+        document.querySelectorAll('.error-message').forEach(elem => {
+          elem.style.display = 'none';
+        });
+        
+        // Get form values
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        // Basic validation
+        let isValid = true;
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          document.getElementById('emailError').textContent = 'Please enter a valid email address';
+          document.getElementById('emailError').style.display = 'block';
+          isValid = false;
+        }
+        
+        // Password validation
+        if (password.length < 1) {
+          document.getElementById('passwordError').textContent = 'Please enter your password';
+          document.getElementById('passwordError').style.display = 'block';
+          isValid = false;
+        }
+        
+        if (isValid) {
+          try {
+            // Disable signin button during API call
+            document.getElementById('signinBtn').disabled = true;
+            
+            // Create form data
+            const formData = new URLSearchParams();
+            formData.append('username', email); // FastAPI OAuth2 expects 'username'
+            formData.append('password', password);
+            
+            console.log('Sending request to:', `${API_URL}/login`);
+            
+            // Make API request
+            const response = await fetch(`${API_URL}/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: formData,
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (response.status === 404) {
+              alert('API endpoint not found. Make sure your backend server is running on the correct port.');
+              return;
+            }
+            
+            // Parse response
+            const data = await response.json();
+            console.log('Response data:', data);
+            
+            if (response.ok) {
+              // Store token in localStorage for future authenticated requests
+              localStorage.setItem('access_token', data.access_token);
+              localStorage.setItem('token_type', data.token_type);
+              
+              // Show success message
+              document.getElementById('successMessage').style.display = 'block';
+              
+              // Redirect to home page after 2 seconds
+              setTimeout(() => {
+                window.location.href = './home.html';
+              }, 2000);
+            } else {
+              // Handle API error
+              if (data.detail) {
+                if (data.detail.includes('Incorrect email or password')) {
+                  document.getElementById('emailError').textContent = 'Incorrect email or password';
+                  document.getElementById('emailError').style.display = 'block';
+                } else {
+                  alert('Login error: ' + data.detail);
+                }
+              } else {
+                alert('An unexpected error occurred. Please try again.');
+              }
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Connection error. Please check if the server is running.');
+          } finally {
+            // Re-enable signin button
+            document.getElementById('signinBtn').disabled = false;
+          }
+        }
+      });
+      
+      // Forgot password link handling
+      document.querySelector('.forgot').addEventListener('click', function() {
+        alert('Forgot password functionality will be implemented soon.');
+        // You can redirect to a password reset page instead
+        // window.location.href = './forgot-password.html';
+      });
+    });
+  </script>
+</body>
+</html>

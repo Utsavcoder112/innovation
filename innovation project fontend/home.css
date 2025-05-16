@@ -1,0 +1,320 @@
+/* Base styles from your existing CSS */
+body {
+  margin: 0%;
+  padding-left: 0%;
+  padding-right: 0%;
+  font-family: 'Nunito Sans';
+}
+
+.navbar {
+  position: relative;
+  background-color: #B5BEDA;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 100px;
+  height: 70px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.logo img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-link a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.search {
+  padding: 8px 16px;
+  background-color: #a8dadc;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.search:hover {
+  background-color: #94c9cb;
+}
+
+/* User menu styles - NEW */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #a8dadc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-icon:hover {
+  background-color: #94c9cb;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  min-width: 150px;
+  display: none;
+  z-index: 100;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f8f8f8;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  background: url('https://cdn.mos.cms.futurecdn.net/xSfXnSi2oAou3w9eMmjRFT.jpg') no-repeat center center/cover;
+  height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* black overlay with 50% opacity */
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2; /* ensure content is above overlay */
+  max-width: 700px;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+}
+
+.learn-btn {
+  margin-top: 20px;
+  padding: 10px 25px;
+  background: #20797a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Key Benefits Section */
+.benefits {
+  padding: 50px 100px 80px 100px;
+  background-color: #dfe5ef;
+  text-align: center;
+}
+
+.benefits h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.benefits p {
+  margin-bottom: 30px;
+  font-size: 1rem;
+}
+
+.benefit-cards {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 250px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.card i {
+  font-size: 40px;
+  color: #20797a;
+  margin-bottom: 10px;
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+/* Footer Section */
+footer {
+  background-color: #d3d6dd;
+  padding: 20px 100px;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-links div {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-links h4 {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.footer-links a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.footer-links input {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #999;
+}
+
+.subscribe-btn {
+  background-color: #00f0c0;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.footer-bottom {
+  border-top: 1px solid #aaa;
+  margin-top: 40px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-bottom p,
+.footer-bottom a {
+  color: #333;
+}
+
+.social-icons a {
+  margin-left: 10px;
+  font-size: 18px;
+  color: #333;
+  height: 20px;
+  width: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .nav-link {
+    gap: 15px;
+  }
+
+  .footer-links div {
+    min-width: 150px;
+  }
+
+  .benefits {
+    padding: 50px 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .nav-link {
+    gap: 10px;
+  }
+
+  .nav-link a {
+    font-size: 14px;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .footer-links {
+    flex-direction: column;
+  }
+}

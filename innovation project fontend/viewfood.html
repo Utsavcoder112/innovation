@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Annadan - View All Foods</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="./viewfood.css">  
+    <link rel="stylesheet" href="./request.css">
+    <link rel="stylesheet" href="./save-request.css">
+    <style>
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                Annadan
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <a href="./Donar/donar.html"><i class="fas fa-home"></i> Dashboard</a>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
+                    <div class="dropdown-menu">
+                        <a href="./form.html">Add Food</a>
+                        <a href="#">Manage Listings</a>
+                        <a href="#">Food History</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
+                    <div class="dropdown-menu">
+                        <a href="#">New Requests</a>
+                        <a href="#">Completed</a>
+                        <a href="#">Rejected</a>
+                        <a href="#">All Requests</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="#" class="action-btn donate-btn"><i class="fas fa-plus-circle"></i> Donate Food</a>
+                <a href="#" class="action-btn request-btn"><i class="fas fa-hand-holding"></i> Request Food</a>
+                <a href="#" class="action-btn view-btn"><i class="fas fa-list-alt"></i> View All Foods</a>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search foods...">
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">John Donor</div>
+                    <div class="user-role">Food Provider</div>
+                </div>
+                <i class="fas fa-ellipsis-v" style="color: rgba(255, 255, 255, 0.5); cursor: pointer;"></i>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Navbar -->
+            <header class="navbar">
+                <div class="page-title">Available Food Donations</div>
+                <div class="navbar-right">
+                    <ul>
+                        <li><a href="./home.html">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Foods Container -->
+            <div class="foods-container">
+                <div class="foods-header">
+                    <h1>Available Food Donations</h1>
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-list"></i> All
+                        </button>
+                        <button class="filter-btn" data-filter="expiring">
+                            <i class="fas fa-clock"></i> Expiring Soon
+                        </button>
+                        <button class="filter-btn" data-filter="recent">
+                            <i class="fas fa-plus-circle"></i> Recently Added
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div id="loader" class="loader"></div>
+                
+                <!-- Food Listings -->
+                <div id="foodListings" class="food-listings">
+                    <!-- Food cards will be injected here by JavaScript -->
+                </div>
+                
+                <!-- Empty State (shown when no results) -->
+                <div id="emptyState" class="empty-state" style="display:none;">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No food donations available</h3>
+                    <p>There are currently no food donations available. Check back later or donate some food yourself!</p>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination buttons will be added dynamically -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-logo">Annadan</div>
+                    <div class="footer-links">
+                        <a href="#">About</a>
+                        <a href="#">Our Mission</a>
+                        <a href="#">How It Works</a>
+                        <a href="#">Contact</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <!-- Food Details Modal -->
+    <div id="foodModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Food Donation Details</div>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="donation-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Donated by:</div>
+                        <div class="detail-value" id="modalDonor">John Donor</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Pickup Address:</div>
+                        <div class="detail-value" id="modalAddress">123 Main St, City</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Pickup Date:</div>
+                        <div class="detail-value" id="modalPickupDate">May 15, 2025</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Pickup Time:</div>
+                        <div class="detail-value" id="modalPickupTime">Afternoon (12PM - 4PM)</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Expires On:</div>
+                        <div class="detail-value" id="modalExpiryDate">May 17, 2025</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value" id="modalDescription">Detailed description of the food will appear here.</div>
+                    </div>
+                </div>
+                
+                <div class="food-items-list">
+                    <h3>Food Items</h3>
+                    <table class="food-items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalFoodItems">
+                            <!-- Food items will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="contact-btn email-btn" id="modalEmailBtn">
+                    <i class="fas fa-envelope"></i> Email Donor
+                </button>
+                <button class="contact-btn phone-btn" id="modalPhoneBtn">
+                    <i class="fas fa-phone"></i> Call Donor
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+// Global variables
+let allDonations = [];
+let currentFilter = 'all';
+let currentPage = 1;
+const itemsPerPage = 9;
+
+// When document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the food listings
+    loadFoodDonations();
+    
+    // Add event listeners for filter buttons
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Set current filter
+            currentFilter = this.dataset.filter;
+            
+            // Reset pagination
+            currentPage = 1;
+            
+            // Apply filter and update display
+            filterAndDisplayDonations();
+        });
+    });
+    
+    // Add event listener for search input
+    document.getElementById('search-input').addEventListener('input', function() {
+        filterAndDisplayDonations();
+    });
+});
+
+// Fetch all food donations from the API
+async function loadFoodDonations() {
+    // Show loader
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('foodListings').style.display = 'none';
+    
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/donations/');
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch donations');
+        }
+        
+        const data = await response.json();
+        allDonations = data;
+        
+        // Filter and display donations
+        filterAndDisplayDonations();
+        
+    } catch (error) {
+        console.error('Error fetching donations:', error);
+        document.getElementById('emptyState').style.display = 'flex';
+    } finally {
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('foodListings').style.display = 'grid';
+    }
+}
+
+// Filter and display donations based on current filter and search
+function filterAndDisplayDonations() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    
+    // Filter donations based on search term and current filter
+    let filteredDonations = allDonations.filter(donation => {
+        // Search filter
+        const matchesSearch = 
+            donation.title.toLowerCase().includes(searchTerm) ||
+            donation.description.toLowerCase().includes(searchTerm) ||
+            donation.items.some(item => item.name.toLowerCase().includes(searchTerm));
+            
+        // Additional filters
+        let matchesFilter = true;
+        
+        if (currentFilter === 'expiring') {
+            // Filter for donations expiring within 2 days
+            const expiryDate = new Date(donation.expiry_date);
+            const now = new Date();
+            const twoDaysFromNow = new Date();
+            twoDaysFromNow.setDate(now.getDate() + 2);
+            matchesFilter = expiryDate <= twoDaysFromNow;
+        } else if (currentFilter === 'recent') {
+            // Filter for donations added in the last 24 hours
+            const createdAt = new Date(donation.created_at);
+            const now = new Date();
+            const oneDayAgo = new Date();
+            oneDayAgo.setDate(now.getDate() - 1);
+            matchesFilter = createdAt >= oneDayAgo;
+        }
+        
+        return matchesSearch && matchesFilter;
+    });
+    
+    // Sort donations (most recent first)
+    filteredDonations.sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+    });
+    
+    // Paginate donations
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedDonations = filteredDonations.slice(startIndex, endIndex);
+    
+    // Display donations
+    displayDonations(paginatedDonations, filteredDonations.length);
+    
+    // Create pagination
+    createPagination(filteredDonations.length);
+}
+
+// Display the donations in the UI
+function displayDonations(donations, totalCount) {
+    const foodListings = document.getElementById('foodListings');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Clear existing content
+    foodListings.innerHTML = '';
+    
+    if (donations.length === 0) {
+        // Show empty state if no donations
+        emptyState.style.display = 'flex';
+        foodListings.style.display = 'none';
+    } else {
+        // Hide empty state and show donations
+        emptyState.style.display = 'none';
+        foodListings.style.display = 'grid';
+        
+        // Create cards for each donation
+        donations.forEach(donation => {
+            const card = createDonationCard(donation);
+            foodListings.appendChild(card);
+        });
+    }
+}
+
+// Create a donation card element
+function createDonationCard(donation) {
+    // Calculate days until expiry
+    const expiryDate = new Date(donation.expiry_date);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+    let expiryText, expiryClass;
+    
+    if (daysUntilExpiry < 0) {
+        expiryText = 'Expired';
+        expiryClass = 'expired';
+    } else if (daysUntilExpiry === 0) {
+        expiryText = 'Expires Today';
+        expiryClass = 'expiring-today';
+    } else if (daysUntilExpiry === 1) {
+        expiryText = 'Expires Tomorrow';
+        expiryClass = 'expiring-soon';
+    } else {
+        expiryText = `Expires in ${daysUntilExpiry} days`;
+        expiryClass = daysUntilExpiry <= 2 ? 'expiring-soon' : '';
+    }
+    
+    // Create card element
+    const card = document.createElement('div');
+    card.className = `food-card ${expiryClass}`;
+    card.dataset.id = donation.id;
+    
+    // Card image
+    let imageHtml = '';
+    if (donation.image_path) {
+        imageHtml = `<img src="${donation.image_path}" alt="${donation.title}" />`;
+    } else {
+        // Use a placeholder if no image
+        imageHtml = `<div class="no-image">
+            <i class="fas fa-utensils"></i>
+        </div>`;
+    }
+    
+    // Get first 2 food items (if available)
+    let itemsHtml = '';
+    if (donation.items && donation.items.length > 0) {
+        const displayItems = donation.items.slice(0, 2);
+        itemsHtml = displayItems.map(item => 
+            `<div class="food-quantity">
+                <span>${item.quantity} ${item.unit}</span> ${item.name}
+            </div>`
+        ).join('');
+        
+        if (donation.items.length > 2) {
+            itemsHtml += `<div class="food-quantity">+${donation.items.length - 2} more items</div>`;
+        }
+    }
+    
+    // Format pickup date
+    const pickupDate = new Date(donation.pickup_date);
+    const formattedPickupDate = pickupDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    
+    // Build card HTML
+    card.innerHTML = `
+        <div class="food-image">
+            ${imageHtml}
+            <div class="expiry-tag ${expiryClass}">${expiryText}</div>
+        </div>
+        <div class="food-info">
+            <h3 class="food-title">${donation.title}</h3>
+            <div class="food-items">
+                ${itemsHtml}
+            </div>
+            <div class="food-meta">
+                <div class="meta-item">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    ${donation.pickup_address.split(',')[0]}
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i> ${formattedPickupDate}
+                </div>
+            </div>
+            <button class="view-details-btn" onclick="openDonationDetails('${donation.id}')">View Details</button>
+            <button class="request-btn" onclick="showRequestConfirmation('${donation.id}')">Request</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Open the donation details modal
+function openDonationDetails(donationId) {
+    const donation = allDonations.find(d => d.id === donationId);
+    
+    if (!donation) {
+        console.error('Donation not found:', donationId);
+        return;
+    }
+    
+    // Fill modal with donation details
+    document.getElementById('modalTitle').textContent = donation.title;
+    document.getElementById('modalDescription').textContent = donation.description;
+    document.getElementById('modalAddress').textContent = donation.pickup_address;
+    
+    // Format dates
+    const pickupDate = new Date(donation.pickup_date);
+    document.getElementById('modalPickupDate').textContent = pickupDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    
+    const expiryDate = new Date(donation.expiry_date);
+    document.getElementById('modalExpiryDate').textContent = expiryDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    
+    // Pickup time window
+    let pickupTimeText = '';
+    switch(donation.pickup_time) {
+        case 'morning':
+            pickupTimeText = 'Morning (8AM - 12PM)';
+            break;
+        case 'afternoon':
+            pickupTimeText = 'Afternoon (12PM - 4PM)';
+            break;
+        case 'evening':
+            pickupTimeText = 'Evening (4PM - 8PM)';
+            break;
+        default:
+            pickupTimeText = donation.pickup_time;
+    }
+    document.getElementById('modalPickupTime').textContent = pickupTimeText;
+    
+    // Extract name from email (just a placeholder for donor name)
+    const emailParts = donation.contact_email.split('@');
+    const donorName = emailParts[0].charAt(0).toUpperCase() + emailParts[0].slice(1);
+    document.getElementById('modalDonor').textContent = donorName;
+    
+    // Add food items to table
+    const foodItemsTable = document.getElementById('modalFoodItems');
+    foodItemsTable.innerHTML = '';
+    
+    donation.items.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unit}</td>
+        `;
+        foodItemsTable.appendChild(row);
+    });
+    
+    // Set contact buttons
+    document.getElementById('modalEmailBtn').onclick = function() {
+        window.location.href = `mailto:${donation.contact_email}?subject=Interested in your food donation: ${donation.title}`;
+    };
+    
+    document.getElementById('modalPhoneBtn').onclick = function() {
+        window.location.href = `tel:${donation.contact_phone}`;
+    };
+    
+    // Show the modal
+    document.getElementById('foodModal').style.display = 'block';
+}
+
+// Close the donation details modal
+function closeModal() {
+    document.getElementById('foodModal').style.display = 'none';
+}
+
+// Show request confirmation dialog
+function showRequestConfirmation(donationId) {
+    const donation = allDonations.find(d => d.id === donationId);
+    
+    if (!donation) {
+        console.error('Donation not found:', donationId);
+        return;
+    }
+    
+    // Create and show confirmation modal
+    const confirmationModal = document.createElement('div');
+    confirmationModal.className = 'modal request-confirmation-modal';
+    confirmationModal.id = 'requestConfirmationModal';
+    
+    confirmationModal.innerHTML = `
+        <div class="modal-content confirmation-content">
+            <div class="modal-header">
+                <div class="modal-title">Confirm Food Request</div>
+                <span class="close-modal" onclick="closeRequestConfirmation()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>You are about to request the following food donation:</p>
+                <h3>${donation.title}</h3>
+                <p>An email will be sent to the donor to notify them of your interest.</p>
+                
+                <div class="request-form">
+                    <div class="form-group">
+                        <label for="requesterName">Your Name:</label>
+                        <input type="text" id="requesterName" class="form-input" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="requesterEmail">Your Email:</label>
+                        <input type="email" id="requesterEmail" class="form-input" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="requesterPhone">Your Phone (optional):</label>
+                        <input type="tel" id="requesterPhone" class="form-input" placeholder="Enter your phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestMessage">Message to Donor (optional):</label>
+                        <textarea id="requestMessage" class="form-input" rows="3" placeholder="Add any specific details about your request"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeRequestConfirmation()">Cancel</button>
+                <button class="confirm-btn" onclick="submitFoodRequest('${donationId}')">Confirm Request</button>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to the document
+    document.body.appendChild(confirmationModal);
+    
+    // Display the modal
+    confirmationModal.style.display = 'block';
+    
+    // Add event listener to close on outside click
+    confirmationModal.addEventListener('click', function(event) {
+        if (event.target === confirmationModal) {
+            closeRequestConfirmation();
+        }
+    });
+    
+    // Add event listener to close on ESC key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeRequestConfirmation();
+        }
+    });
+}
+
+// Close request confirmation modal
+function closeRequestConfirmation() {
+    const modal = document.getElementById('requestConfirmationModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Submit food request and send email
+async function submitFoodRequest(donationId) {
+    const donation = allDonations.find(d => d.id === donationId);
+    
+    if (!donation) {
+        console.error('Donation not found:', donationId);
+        return;
+    }
+    
+    // Get form values
+    const requesterName = document.getElementById('requesterName').value.trim();
+    const requesterEmail = document.getElementById('requesterEmail').value.trim();
+    const requesterPhone = document.getElementById('requesterPhone').value.trim();
+    const requestMessage = document.getElementById('requestMessage').value.trim();
+    
+    // Validate form
+    if (!requesterName || !requesterEmail) {
+        alert('Please fill in your name and email to proceed with the request.');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(requesterEmail)) {
+        alert('Please enter a valid email address.');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const confirmBtn = document.querySelector('.confirm-btn');
+        const originalText = confirmBtn.textContent;
+        confirmBtn.textContent = 'Sending...';
+        confirmBtn.disabled = true;
+        
+        // Create request data
+        const requestData = {
+            id: generateUniqueId(), // Function to generate a unique ID
+            donationId: donationId,
+            donationTitle: donation.title,
+            donorEmail: donation.contact_email,
+            requesterName: requesterName,
+            requesterEmail: requesterEmail,
+            requesterPhone: requesterPhone || '',
+            requestMessage: requestMessage || '',
+            status: 'pending',
+            timestamp: new Date().toISOString()
+        };
+        
+        // In a real application, send to backend
+        // const response = await fetch('http://127.0.0.1:8000/api/send-request-email/', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(requestData)
+        // });
+        
+        // if (!response.ok) {
+        //     throw new Error('Failed to send email request');
+        // }
+        
+        // const result = await response.json();
+        
+        // For demo purposes, we'll store it locally
+        saveRequestToLocalStorage(requestData);
+        
+        // Update UI to reflect new request
+        updateRequestCount();
+        
+        // Close the confirmation modal
+        closeRequestConfirmation();
+        
+        // Show success notification
+        showNotification('Request Sent Successfully', 'Your request has been sent to the donor. They will contact you shortly with more details.', 'success');
+        
+    } catch (error) {
+        console.error('Error submitting request:', error);
+        alert('There was a problem submitting your request. Please try again later.');
+        
+        // Reset button state
+        const confirmBtn = document.querySelector('.confirm-btn');
+        if (confirmBtn) {
+            confirmBtn.textContent = 'Confirm Request';
+            confirmBtn.disabled = false;
+        }
+    }
+}
+
+// Generate a unique ID for requests
+function generateUniqueId() {
+    return 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Save request to local storage (simulating backend)
+function saveRequestToLocalStorage(request) {
+    // Get existing requests
+    let requests = JSON.parse(localStorage.getItem('foodRequests') || '[]');
+    
+    // Add new request
+    requests.push(request);
+    
+    // Save back to local storage
+    localStorage.setItem('foodRequests', JSON.stringify(requests));
+    
+    // Update the pending requests array
+    pendingRequests = requests.filter(req => req.status === 'pending');
+    totalNewRequests = pendingRequests.length;
+}
+
+// Update the request count in the UI
+function updateRequestCount() {
+    // Get latest data
+    const requests = JSON.parse(localStorage.getItem('foodRequests') || '[]');
+    pendingRequests = requests.filter(req => req.status === 'pending');
+    totalNewRequests = pendingRequests.length;
+    
+    // Update sidebar notification
+    const requestDropdown = document.querySelector('.menu-item.dropdown:nth-child(3)');
+    const newRequestsLink = requestDropdown.querySelector('.dropdown-menu a:first-child');
+    
+    if (totalNewRequests > 0) {
+        // Add or update the notification badge
+        let badge = newRequestsLink.querySelector('.request-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'request-badge';
+            newRequestsLink.appendChild(badge);
+        }
+        badge.textContent = totalNewRequests;
+        newRequestsLink.classList.add('has-notification');
+    } else {
+        // Remove the notification badge if no new requests
+        const badge = newRequestsLink.querySelector('.request-badge');
+        if (badge) {
+            badge.remove();
+        }
+        newRequestsLink.classList.remove('has-notification');
+    }
+    
+    // Update header notification count
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge) {
+        notificationBadge.textContent = totalNewRequests;
+        notificationBadge.style.display = totalNewRequests > 0 ? 'flex' : 'none';
+    }
+}
+
+// Add event listener for the "New Requests" link
+document.addEventListener('DOMContentLoaded', function() {
+    // Your existing DOMContentLoaded code...
+    
+    // Add event listener for New Requests link
+    const newRequestsLink = document.querySelector('.menu-item.dropdown:nth-child(3) .dropdown-menu a:first-child');
+    if (newRequestsLink) {
+        newRequestsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadRequestsPage('pending');
+        });
+    }
+    
+    // Add event listeners for other request types
+    const completedRequestsLink = document.querySelector('.menu-item.dropdown:nth-child(3) .dropdown-menu a:nth-child(2)');
+    if (completedRequestsLink) {
+        completedRequestsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadRequestsPage('completed');
+        });
+    }
+    
+    const rejectedRequestsLink = document.querySelector('.menu-item.dropdown:nth-child(3) .dropdown-menu a:nth-child(3)');
+    if (rejectedRequestsLink) {
+        rejectedRequestsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadRequestsPage('rejected');
+        });
+    }
+    
+    const allRequestsLink = document.querySelector('.menu-item.dropdown:nth-child(3) .dropdown-menu a:nth-child(4)');
+    if (allRequestsLink) {
+        allRequestsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadRequestsPage('all');
+        });
+    }
+    
+    // Initialize request count
+    updateRequestCount();
+});
+
+// Load the requests page based on the current filter
+function loadRequestsPage(filter) {
+    // Get the main content area
+    const mainContent = document.querySelector('.main-content');
+    
+    // Get all requests from local storage
+    const allRequests = JSON.parse(localStorage.getItem('foodRequests') || '[]');
+    
+    // Filter requests based on the selected filter
+    let filteredRequests;
+    let statusTitle;
+    
+    switch (filter) {
+        case 'pending':
+            filteredRequests = allRequests.filter(req => req.status === 'pending');
+            statusTitle = 'New Requests';
+            break;
+        case 'completed':
+            filteredRequests = allRequests.filter(req => req.status === 'completed');
+            statusTitle = 'Completed Requests';
+            break;
+        case 'rejected':
+            filteredRequests = allRequests.filter(req => req.status === 'rejected');
+            statusTitle = 'Rejected Requests';
+            break;
+        case 'all':
+        default:
+            filteredRequests = allRequests;
+            statusTitle = 'All Requests';
+            break;
+    }
+    
+    // Sort requests by timestamp (newest first)
+    filteredRequests.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    // Create requests page HTML
+    const requestsHTML = `
+        <header class="navbar">
+            <div class="page-title">${statusTitle}</div>
+            <div class="navbar-right">
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">How It Works</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">${totalNewRequests}</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="requests-container">
+            <div class="requests-header">
+                <h1>${statusTitle}</h1>
+                <div class="filters">
+                    <button class="filter-btn ${filter === 'all' ? 'active' : ''}" onclick="loadRequestsPage('all')">
+                        <i class="fas fa-list"></i> All
+                    </button>
+                    <button class="filter-btn ${filter === 'pending' ? 'active' : ''}" onclick="loadRequestsPage('pending')">
+                        <i class="fas fa-clock"></i> New
+                    </button>
+                    <button class="filter-btn ${filter === 'completed' ? 'active' : ''}" onclick="loadRequestsPage('completed')">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </button>
+                    <button class="filter-btn ${filter === 'rejected' ? 'active' : ''}" onclick="loadRequestsPage('rejected')">
+                        <i class="fas fa-times-circle"></i> Rejected
+                    </button>
+                </div>
+            </div>
+            
+            <div class="requests-list">
+                ${filteredRequests.length > 0 ? 
+                    filteredRequests.map(request => createRequestItem(request)).join('') : 
+                    `<div class="empty-requests">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No ${filter !== 'all' ? filter : ''} requests found</h3>
+                        <p>There are currently no ${filter !== 'all' ? filter : ''} requests to display.</p>
+                    </div>`
+                }
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">Annadan</div>
+                <div class="footer-links">
+                    <a href="#">About</a>
+                    <a href="#">Our Mission</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </footer>
+    `;
+    
+    // Replace main content with requests page
+    mainContent.innerHTML = requestsHTML;
+    
+    // If viewing pending requests, mark them as seen
+    if (filter === 'pending') {
+        markPendingRequestsAsSeen();
+    }
+}
+
+// Create HTML for a single request item
+function createRequestItem(request) {
+    // Format timestamp
+    const timestamp = new Date(request.timestamp);
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    const formattedTime = timestamp.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Determine status class and icon
+    let statusClass, statusIcon;
+    switch(request.status) {
+        case 'pending':
+            statusClass = 'pending';
+            statusIcon = 'clock';
+            break;
+        case 'completed':
+            statusClass = 'completed';
+            statusIcon = 'check-circle';
+            break;
+        case 'rejected':
+            statusClass = 'rejected';
+            statusIcon = 'times-circle';
+            break;
+        default:
+            statusClass = 'pending';
+            statusIcon = 'question-circle';
+    }
+    
+    return `
+        <div class="request-item ${statusClass}" data-id="${request.id}">
+            <div class="request-header">
+                <div class="request-title">
+                    <h3>${request.donationTitle}</h3>
+                    <span class="request-status ${statusClass}">
+                        <i class="fas fa-${statusIcon}"></i> ${request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                    </span>
+                </div>
+                <div class="request-timestamp">
+                    <i class="far fa-calendar-alt"></i> ${formattedDate} at ${formattedTime}
+                </div>
+            </div>
+            
+            <div class="request-details">
+                <div class="requester-info">
+                    <div class="info-row">
+                        <span class="info-label">Requester:</span>
+                        <span class="info-value">${request.requesterName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">${request.requesterEmail}</span>
+                    </div>
+                    ${request.requesterPhone ? `
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">${request.requesterPhone}</span>
+                    </div>` : ''}
+                </div>
+                
+                ${request.requestMessage ? `
+                <div class="request-message">
+                    <div class="message-label">Message:</div>
+                    <div class="message-content">${request.requestMessage}</div>
+                </div>` : ''}
+            </div>
+            
+            <div class="request-actions">
+                ${request.status === 'pending' ? `
+                <button class="action-btn approve-btn" onclick="updateRequestStatus('${request.id}', 'completed')">
+                    <i class="fas fa-check"></i> Approve
+                </button>
+                <button class="action-btn reject-btn" onclick="updateRequestStatus('${request.id}', 'rejected')">
+                    <i class="fas fa-times"></i> Reject
+                </button>` : ''}
+                <button class="action-btn contact-btn" onclick="contactRequester('${request.requesterEmail}', '${request.requesterPhone || ''}')">
+                    <i class="fas fa-envelope"></i> Contact
+                </button>
+                <button class="action-btn view-donation-btn" onclick="viewRelatedDonation('${request.donationId}')">
+                    <i class="fas fa-info-circle"></i> View Donation
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Mark pending requests as seen when viewed
+function markPendingRequestsAsSeen() {
+    // In a real application, this would update the database
+    // For this demo, we'll just update the UI
+    updateRequestCount();
+}
+
+// Update the status of a request
+function updateRequestStatus(requestId, newStatus) {
+    // Get all requests
+    let allRequests = JSON.parse(localStorage.getItem('foodRequests') || '[]');
+    
+    // Find and update the specified request
+    const updatedRequests = allRequests.map(req => {
+        if (req.id === requestId) {
+            return { ...req, status: newStatus };
+        }
+        return req;
+    });
+    
+    // Save back to local storage
+    localStorage.setItem('foodRequests', JSON.stringify(updatedRequests));
+    
+    // Reload the current page to show updated status
+    const currentFilter = document.querySelector('.filter-btn.active').textContent.trim().toLowerCase();
+    loadRequestsPage(currentFilter === 'new' ? 'pending' : currentFilter);
+    
+    // Update request count in UI
+    updateRequestCount();
+    
+    // Show notification
+    const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+    showNotification(`Request ${statusText}`, `The request has been marked as ${newStatus}.`, newStatus === 'completed' ? 'success' : 'info');
+}
+
+// Contact the requester
+function contactRequester(email, phone) {
+    if (email) {
+        window.location.href = `mailto:${email}`;
+    } else if (phone) {
+        window.location.href = `tel:${phone}`;
+    } else {
+        alert('No contact information available for this requester.');
+    }
+}
+
+// View the related donation
+function viewRelatedDonation(donationId) {
+    // Close the requests page and return to donation listing
+    loadFoodDonations().then(() => {
+        // Find and open the donation details
+        setTimeout(() => {
+            openDonationDetails(donationId);
+        }, 500);
+    });
+}
+
+// Function to send email notification (simulated)
+function sendEmailNotification(donation, requester) {
+    // In a real application, this would be handled by the backend
+    console.log('Sending email notification to donor:', donation.contact_email);
+    
+    // Email content that would be sent
+    const emailSubject = `New Food Request: ${donation.title}`;
+    const emailBody = `
+        Hello,
+        
+        You have received a new request for your food donation "${donation.title}".
+        
+        Requester Details:
+        - Name: ${requester.name}
+        - Email: ${requester.email}
+        - Phone: ${requester.phone || 'Not provided'}
+        
+        Message from requester:
+        ${requester.message || 'No message provided.'}
+        
+        Please contact the requester directly to coordinate the pickup.
+        
+        Thank you for your donation!
+        - Annadan Team
+    `;
+    
+    // Log the email that would be sent (in a real app, this would be sent via email API)
+    console.log('Email Subject:', emailSubject);
+    console.log('Email Body:', emailBody);
+}
+
+// Show notification
+function showNotification(title, message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle'}"></i>
+            </div>
+            <div class="notification-text">
+                <h4>${title}</h4>
+                <p>${message}</p>
+            </div>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 5000);
+}
+
+// Create pagination elements
+function createPagination(totalItems) {
+    const paginationDiv = document.getElementById('pagination');
+    paginationDiv.innerHTML = '';
+    
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (totalPages <= 1) {
+        return; // No pagination needed
+    }
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn prev';
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            filterAndDisplayDonations();
+        }
+    });
+    paginationDiv.appendChild(prevBtn);
+    
+    // Page number buttons
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+    
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `pagination-btn page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', function() {
+            currentPage = i;
+            filterAndDisplayDonations();
+        });
+        paginationDiv.appendChild(pageBtn);
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn next';
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            filterAndDisplayDonations();
+        }
+    });
+    paginationDiv.appendChild(nextBtn);
+}
+
+// Handle window click to close modal
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('foodModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+
+// Close modal when ESC key is pressed
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Refresh data periodically (every 60 seconds)
+setInterval(loadFoodDonations, 60000);
+
+// // Global variables
+// let allDonations = [];
+// let currentFilter = 'all';
+// let currentPage = 1;
+// const itemsPerPage = 9;
+
+// // When document is ready
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Initialize the food listings
+//     loadFoodDonations();
+    
+//     // Add event listeners for filter buttons
+//     document.querySelectorAll('.filter-btn').forEach(button => {
+//         button.addEventListener('click', function() {
+//             // Remove active class from all buttons
+//             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+//             // Add active class to clicked button
+//             this.classList.add('active');
+            
+//             // Set current filter
+//             currentFilter = this.dataset.filter;
+            
+//             // Reset pagination
+//             currentPage = 1;
+            
+//             // Apply filter and update display
+//             filterAndDisplayDonations();
+//         });
+//     });
+    
+//     // Add event listener for search input
+//     document.getElementById('search-input').addEventListener('input', function() {
+//         filterAndDisplayDonations();
+//     });
+// });
+
+// // Fetch all food donations from the API
+// async function loadFoodDonations() {
+//     // Show loader
+//     document.getElementById('loader').style.display = 'block';
+//     document.getElementById('foodListings').style.display = 'none';
+    
+//     try {
+//         const response = await fetch('http://127.0.0.1:8000/api/donations/');
+        
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch donations');
+//         }
+        
+//         const data = await response.json();
+//         allDonations = data;
+        
+//         // Filter and display donations
+//         filterAndDisplayDonations();
+        
+//     } catch (error) {
+//         console.error('Error fetching donations:', error);
+//         document.getElementById('emptyState').style.display = 'flex';
+//     } finally {
+//         // Hide loader
+//         document.getElementById('loader').style.display = 'none';
+//         document.getElementById('foodListings').style.display = 'grid';
+//     }
+// }
+
+// // Filter and display donations based on current filter and search
+// function filterAndDisplayDonations() {
+//     const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    
+//     // Filter donations based on search term and current filter
+//     let filteredDonations = allDonations.filter(donation => {
+//         // Search filter
+//         const matchesSearch = 
+//             donation.title.toLowerCase().includes(searchTerm) ||
+//             donation.description.toLowerCase().includes(searchTerm) ||
+//             donation.items.some(item => item.name.toLowerCase().includes(searchTerm));
+            
+//         // Additional filters
+//         let matchesFilter = true;
+        
+//         if (currentFilter === 'expiring') {
+//             // Filter for donations expiring within 2 days
+//             const expiryDate = new Date(donation.expiry_date);
+//             const now = new Date();
+//             const twoDaysFromNow = new Date();
+//             twoDaysFromNow.setDate(now.getDate() + 2);
+//             matchesFilter = expiryDate <= twoDaysFromNow;
+//         } else if (currentFilter === 'recent') {
+//             // Filter for donations added in the last 24 hours
+//             const createdAt = new Date(donation.created_at);
+//             const now = new Date();
+//             const oneDayAgo = new Date();
+//             oneDayAgo.setDate(now.getDate() - 1);
+//             matchesFilter = createdAt >= oneDayAgo;
+//         }
+        
+//         return matchesSearch && matchesFilter;
+//     });
+    
+//     // Sort donations (most recent first)
+//     filteredDonations.sort((a, b) => {
+//         return new Date(b.created_at) - new Date(a.created_at);
+//     });
+    
+//     // Paginate donations
+//     const startIndex = (currentPage - 1) * itemsPerPage;
+//     const endIndex = startIndex + itemsPerPage;
+//     const paginatedDonations = filteredDonations.slice(startIndex, endIndex);
+    
+//     // Display donations
+//     displayDonations(paginatedDonations, filteredDonations.length);
+    
+//     // Create pagination
+//     createPagination(filteredDonations.length);
+// }
+
+// // Display the donations in the UI
+// function displayDonations(donations, totalCount) {
+//     const foodListings = document.getElementById('foodListings');
+//     const emptyState = document.getElementById('emptyState');
+    
+//     // Clear existing content
+//     foodListings.innerHTML = '';
+    
+//     if (donations.length === 0) {
+//         // Show empty state if no donations
+//         emptyState.style.display = 'flex';
+//         foodListings.style.display = 'none';
+//     } else {
+//         // Hide empty state and show donations
+//         emptyState.style.display = 'none';
+//         foodListings.style.display = 'grid';
+        
+//         // Create cards for each donation
+//         donations.forEach(donation => {
+//             const card = createDonationCard(donation);
+//             foodListings.appendChild(card);
+//         });
+//     }
+// }
+
+// // Create a donation card element
+// function createDonationCard(donation) {
+//     // Calculate days until expiry
+//     const expiryDate = new Date(donation.expiry_date);
+//     const now = new Date();
+//     const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+//     let expiryText, expiryClass;
+    
+//     if (daysUntilExpiry < 0) {
+//         expiryText = 'Expired';
+//         expiryClass = 'expired';
+//     } else if (daysUntilExpiry === 0) {
+//         expiryText = 'Expires Today';
+//         expiryClass = 'expiring-today';
+//     } else if (daysUntilExpiry === 1) {
+//         expiryText = 'Expires Tomorrow';
+//         expiryClass = 'expiring-soon';
+//     } else {
+//         expiryText = `Expires in ${daysUntilExpiry} days`;
+//         expiryClass = daysUntilExpiry <= 2 ? 'expiring-soon' : '';
+//     }
+    
+//     // Create card element
+//     const card = document.createElement('div');
+//     card.className = `food-card ${expiryClass}`;
+//     card.dataset.id = donation.id;
+    
+//     // Card image
+//     let imageHtml = '';
+//     if (donation.image_path) {
+//         imageHtml = `<img src="${donation.image_path}" alt="${donation.title}" />`;
+//     } else {
+//         // Use a placeholder if no image
+//         imageHtml = `<div class="no-image">
+//             <i class="fas fa-utensils"></i>
+//         </div>`;
+//     }
+    
+//     // Get first 2 food items (if available)
+//     let itemsHtml = '';
+//     if (donation.items && donation.items.length > 0) {
+//         const displayItems = donation.items.slice(0, 2);
+//         itemsHtml = displayItems.map(item => 
+//             `<div class="food-quantity">
+//                 <span>${item.quantity} ${item.unit}</span> ${item.name}
+//             </div>`
+//         ).join('');
+        
+//         if (donation.items.length > 2) {
+//             itemsHtml += `<div class="food-quantity">+${donation.items.length - 2} more items</div>`;
+//         }
+//     }
+    
+//     // Format pickup date
+//     const pickupDate = new Date(donation.pickup_date);
+//     const formattedPickupDate = pickupDate.toLocaleDateString('en-US', {
+//         month: 'short',
+//         day: 'numeric',
+//         year: 'numeric'
+//     });
+    
+//     // Build card HTML
+//     card.innerHTML = `
+//         <div class="food-image">
+//             ${imageHtml}
+//             <div class="expiry-tag ${expiryClass}">${expiryText}</div>
+//         </div>
+//         <div class="food-info">
+//             <h3 class="food-title">${donation.title}</h3>
+//             <div class="food-items">
+//                 ${itemsHtml}
+//             </div>
+//             <div class="food-meta">
+//                 <div class="meta-item">
+//                     <i class="fas fa-map-marker-alt"></i> 
+//                     ${donation.pickup_address.split(',')[0]}
+//                 </div>
+//                 <div class="meta-item">
+//                     <i class="fas fa-calendar"></i> ${formattedPickupDate}
+//                 </div>
+//             </div>
+//             <button class="view-details-btn" onclick="openDonationDetails('${donation.id}')">View Details</button>
+//             <button class="view-details-btn",>Request</button>
+//         </div>
+        
+        
+//     `;
+    
+    
+//     return card;
+// }
+
+// // Open the donation details modal
+// function openDonationDetails(donationId) {
+//     const donation = allDonations.find(d => d.id === donationId);
+    
+//     if (!donation) {
+//         console.error('Donation not found:', donationId);
+//         return;
+//     }
+    
+//     // Fill modal with donation details
+//     document.getElementById('modalTitle').textContent = donation.title;
+//     document.getElementById('modalDescription').textContent = donation.description;
+//     document.getElementById('modalAddress').textContent = donation.pickup_address;
+    
+//     // Format dates
+//     const pickupDate = new Date(donation.pickup_date);
+//     document.getElementById('modalPickupDate').textContent = pickupDate.toLocaleDateString('en-US', {
+//         weekday: 'long',
+//         month: 'long',
+//         day: 'numeric',
+//         year: 'numeric'
+//     });
+    
+//     const expiryDate = new Date(donation.expiry_date);
+//     document.getElementById('modalExpiryDate').textContent = expiryDate.toLocaleDateString('en-US', {
+//         weekday: 'long',
+//         month: 'long',
+//         day: 'numeric',
+//         year: 'numeric'
+//     });
+    
+//     // Pickup time window
+//     let pickupTimeText = '';
+//     switch(donation.pickup_time) {
+//         case 'morning':
+//             pickupTimeText = 'Morning (8AM - 12PM)';
+//             break;
+//         case 'afternoon':
+//             pickupTimeText = 'Afternoon (12PM - 4PM)';
+//             break;
+//         case 'evening':
+//             pickupTimeText = 'Evening (4PM - 8PM)';
+//             break;
+//         default:
+//             pickupTimeText = donation.pickup_time;
+//     }
+//     document.getElementById('modalPickupTime').textContent = pickupTimeText;
+    
+//     // Extract name from email (just a placeholder for donor name)
+//     const emailParts = donation.contact_email.split('@');
+//     const donorName = emailParts[0].charAt(0).toUpperCase() + emailParts[0].slice(1);
+//     document.getElementById('modalDonor').textContent = donorName;
+    
+//     // Add food items to table
+//     const foodItemsTable = document.getElementById('modalFoodItems');
+//     foodItemsTable.innerHTML = '';
+    
+//     donation.items.forEach(item => {
+//         const row = document.createElement('tr');
+//         row.innerHTML = `
+//             <td>${item.name}</td>
+//             <td>${item.quantity}</td>
+//             <td>${item.unit}</td>
+//         `;
+//         foodItemsTable.appendChild(row);
+//     });
+    
+//     // Set contact buttons
+//     document.getElementById('modalEmailBtn').onclick = function() {
+//         window.location.href = `mailto:${donation.contact_email}?subject=Interested in your food donation: ${donation.title}`;
+//     };
+    
+//     document.getElementById('modalPhoneBtn').onclick = function() {
+//         window.location.href = `tel:${donation.contact_phone}`;
+//     };
+    
+//     // Show the modal
+//     document.getElementById('foodModal').style.display = 'block';
+// }
+
+// // Close the donation details modal
+// function closeModal() {
+//     document.getElementById('foodModal').style.display = 'none';
+// }
+
+// // Create pagination elements
+// function createPagination(totalItems) {
+//     const paginationDiv = document.getElementById('pagination');
+//     paginationDiv.innerHTML = '';
+    
+//     const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+//     if (totalPages <= 1) {
+//         return; // No pagination needed
+//     }
+    
+//     // Previous button
+//     const prevBtn = document.createElement('button');
+//     prevBtn.className = 'pagination-btn prev';
+//     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+//     prevBtn.disabled = currentPage === 1;
+//     prevBtn.addEventListener('click', function() {
+//         if (currentPage > 1) {
+//             currentPage--;
+//             filterAndDisplayDonations();
+//         }
+//     });
+//     paginationDiv.appendChild(prevBtn);
+    
+//     // Page number buttons
+//     let startPage = Math.max(1, currentPage - 2);
+//     let endPage = Math.min(totalPages, startPage + 4);
+    
+//     if (endPage - startPage < 4) {
+//         startPage = Math.max(1, endPage - 4);
+//     }
+    
+//     for (let i = startPage; i <= endPage; i++) {
+//         const pageBtn = document.createElement('button');
+//         pageBtn.className = `pagination-btn page-number ${i === currentPage ? 'active' : ''}`;
+//         pageBtn.textContent = i;
+//         pageBtn.addEventListener('click', function() {
+//             currentPage = i;
+//             filterAndDisplayDonations();
+//         });
+//         paginationDiv.appendChild(pageBtn);
+//     }
+    
+//     // Next button
+//     const nextBtn = document.createElement('button');
+//     nextBtn.className = 'pagination-btn next';
+//     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+//     nextBtn.disabled = currentPage === totalPages;
+//     nextBtn.addEventListener('click', function() {
+//         if (currentPage < totalPages) {
+//             currentPage++;
+//             filterAndDisplayDonations();
+//         }
+//     });
+//     paginationDiv.appendChild(nextBtn);
+// }
+
+// // Handle window click to close modal
+// window.addEventListener('click', function(event) {
+//     const modal = document.getElementById('foodModal');
+//     if (event.target === modal) {
+//         closeModal();
+//     }
+// });
+
+// // Close modal when ESC key is pressed
+// document.addEventListener('keydown', function(event) {
+//     if (event.key === 'Escape') {
+//         closeModal();
+//     }
+// });
+
+// // Refresh data periodically (every 60 seconds)
+// setInterval(loadFoodDonations, 60000);
+
+</script>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Details</title>
+    <link rel="stylesheet" href="request.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo"> <img src="/photos/2.jpg" alt="Logo" height="40"> </div>
+        <nav>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">Donar</a></li>
+                <li><a href="#">Reciver</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Login</a></li>
+                <li><a class="search-btn" href="#">Search</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Banner -->
+    <section class="banner">
+        <img src="/photos/stabery.png" alt="Banner" class="banner-img">
+    </section>
+
+    <!-- Food Details Section -->
+    <section class="food-details">
+        <h2>Food Details</h2>
+        <table class="details-table">
+            <tr>
+                <th>Register By</th>
+                <td>Shresh Poudel</td>
+                <th>Register Date</th>
+                <td>2082/01/06</td>
+            </tr>
+            <tr>
+                <th>Registered Email</th>
+                <td>shresh@12gmail.com</td>
+                <th>Contact Number</th>
+                <td>9843245487</td>
+            </tr>
+            <tr>
+                <th>State Name</th>
+                <td>Bagmati</td>
+                <th>Pick Up Address</th>
+                <td>Maitidevi Temple</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>Food is nice quality</td>
+                <th>City Name</th>
+                <td>Kathmandu</td>
+            </tr>
+            <tr>
+                <th>Image</th>
+                <td>Image</td>
+                <th>Status</th>
+                <td>Not Confirmed Yet</td>
+            </tr>
+        </table>
+
+        <div class="btn-container">
+            <button class="accept-btn" id="requestFoodBtn">Request Food</button>
+        </div>
+    </section>
+    <!-- Food Request Popup -->
+ <div class="popup-overlay" id="requestPopup">
+    <div class="popup-content">
+        <h2>Food Request</h2>
+        <form id="foodRequestForm">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="contact">Contact</label>
+                <input type="tel" id="contact" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" rows="3"></textarea>
+            </div>
+            <div class="form-buttons">
+                <button type="submit" class="submit-btn">Submit</button>
+                <button type="button" class="close-btn" id="closePopupBtn">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div class="success-message" id="successMessage">
+    <div class="message-content">
+        <p>Food is requested successfully! Please wait until approved by donor.</p>
+        <p>We will notify you by email.</p>
+        <button class="ok-btn" id="okBtn">OK</button>
+    </div>
+</div>
+
+<script>
+    // Get elements
+    const requestBtn = document.getElementById('requestFoodBtn');
+    const popup = document.getElementById('requestPopup');
+    const closeBtn = document.getElementById('closePopupBtn');
+    const form = document.getElementById('foodRequestForm');
+    const successMessage = document.getElementById('successMessage');
+    const okBtn = document.getElementById('okBtn');
+
+    // Show popup when Request Food button is clicked
+    requestBtn.addEventListener('click', () => {
+        popup.style.display = 'flex';
+    });
+
+    // Close popup when Close button is clicked
+    closeBtn.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // Form submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        popup.style.display = 'none';
+        successMessage.style.display = 'flex';
+    });
+
+    // Close success message
+    okBtn.addEventListener('click', () => {
+        successMessage.style.display = 'none';
+    });
+
+    // Close popup when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            popup.style.display = 'none';
+        }
+        if (e.target === successMessage) {
+            successMessage.style.display = 'none';
+        }
+    });
+  </script>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <div>
+        <h4>Company</h4>
+        <p><a href="#">About Us</a></p>
+        <p><a href="#">Contact Us</a></p>
+        <p><a href="#">FAQ</a></p>
+      </div>
+      <div>
+        <h4>For Suppliers</h4>
+        <p><a href="#">How It Works</a></p>
+        <p><a href="#">Supplier Login/Registration</a></p>
+      </div>
+      <div>
+        <h4>For Receivers</h4>
+        <p><a href="#">How It Works</a></p>
+        <p><a href="#">Receiver Login/Registration</a></p>
+      </div>
+      <div>
+        <h4>Subscribe to our Newsletter</h4>
+        <p>Stay up-to-date with food availability</p>
+        <input type="email" placeholder="Enter your Email">
+        <button class="subscribe-btn">Subscribe</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 FoodLinker. All rights reserved</p>
+      <div>
+        <a href="#">Terms and Conditions</a> | <a href="#">Privacy Policy</a>
+      </div>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

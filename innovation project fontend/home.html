@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodLinker</title>
+  <link rel="stylesheet" href="home.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Additional CSS for user profile */
+    .user-profile-info {
+      padding: 15px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      text-align: left;
+    }
+    
+    .user-profile-info h4 {
+      margin: 0 0 10px 0;
+      color: #20797a;
+      font-size: 16px;
+    }
+    
+    .user-profile-info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .user-profile-info .user-email {
+      font-style: italic;
+      color: #777;
+      font-size: 13px;
+    }
+    
+    .dropdown-menu {
+      min-width: 220px;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #20797a;
+      animation: spin 1s ease infinite;
+      margin-right: 5px;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <a href="">
+        <img src=".//photos/2.jpg" alt="logo">
+      </a>
+    </div>
+    <div class="nav-link">
+      <a href="">About Us</a>
+      <a href="">Contact Us</a>
+      <a href="./Donar/donar.html">Donor</a>
+      <a href="./reciver view port/reciver.html">Receiver</a>
+      <button class="search"> Search </button>
+      <div class="user-menu">
+        <div class="user-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="dropdown-menu">
+          <div id="userProfileInfo" class="user-profile-info" style="display: none;">
+            <h4>User Profile</h4>
+            <p id="userName">Loading...</p>
+            <p id="userEmail" class="user-email">Loading...</p>
+            <p id="userSince">Member since: Loading...</p>
+          </div>
+          <a href="./signin.html" id="loginOption">Login</a>
+          <a href="./register.html" id="registerOption">Register</a>
+          <a href="#" id="profileOption" style="display: none;">My Profile</a>
+          <a href="#" id="logoutOption" style="display: none;">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Connecting Food Suppliers and Receivers</h1>
+      <p>FoodLinker is an innovative web application designed to seamlessly connect food suppliers and receivers...</p>
+      <button class="learn-btn">Learn More</button>
+    </div>
+  </section>
+
+  <!-- Key Benefits -->
+  <section class="benefits">
+    <h2>Key Benefits of FoodLinker</h2>
+    <p>Discover how our platform enhances food distribution efficiency...</p>
+    <div class="benefit-cards">
+      <div class="card">
+        <i class="fas fa-truck"></i>
+        <h3>Streamlined Process</h3>
+        <p>Our platform simplifies the food distribution process...</p>
+      </div>
+      <div class="card">
+        <i class="fas fa-bell"></i>
+        <h3>Real-Time Notifications</h3>
+        <p>Stay informed with real-time notifications...</p>
+      </div>
+      <div class="card">
+        <i class="fas fa-users"></i>
+        <h3>User-Friendly Interface</h3>
+        <p>Navigating our platform is a breeze for everyone...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <div>
+        <h4>Company</h4>
+        <p><a href="#">About Us</a></p>
+        <p><a href="#">Contact Us</a></p>
+        <p><a href="#">FAQ</a></p>
+      </div>
+      <div>
+        <h4>For Suppliers</h4>
+        <p><a href="#">How It Works</a></p>
+        <p><a href="#">Supplier Login/Registration</a></p>
+      </div>
+      <div>
+        <h4>For Receivers</h4>
+        <p><a href="#">How It Works</a></p>
+        <p><a href="./register.html">Receiver Login/Registration</a></p>
+      </div>
+      <div>
+        <h4>Subscribe to our Newsletter</h4>
+        <p>Stay up-to-date with food availability</p>
+        <input type="email" placeholder="Enter your Email">
+        <button class="subscribe-btn">Subscribe</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 FoodLinker. All rights reserved</p>
+      <div>
+        <a href="#">Terms and Conditions</a> | <a href="#">Privacy Policy</a>
+      </div>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Make sure this URL matches your actual backend server address and port
+      const API_URL = 'http://127.0.0.1:8000';
+      
+      // Check if user is logged in
+      const token = localStorage.getItem('access_token');
+      const tokenType = localStorage.getItem('token_type') || 'Bearer';
+      
+      // Get DOM elements
+      const loginOption = document.getElementById('loginOption');
+      const registerOption = document.getElementById('registerOption');
+      const profileOption = document.getElementById('profileOption');
+      const logoutOption = document.getElementById('logoutOption');
+      const userProfileInfo = document.getElementById('userProfileInfo');
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+      const userSince = document.getElementById('userSince');
+      
+      // Update menu based on login status
+      if (token) {
+        loginOption.style.display = 'none';
+        registerOption.style.display = 'none';
+        profileOption.style.display = 'block';
+        logoutOption.style.display = 'block';
+        userProfileInfo.style.display = 'block';
+        
+        // Fetch user info
+        fetchUserInfo(token, tokenType);
+      }
+      
+      // Function to fetch user information
+      function fetchUserInfo(token, tokenType) {
+        // Show loading state
+        userName.innerHTML = '<span class="loading-spinner"></span> Loading...';
+        userEmail.innerHTML = '<span class="loading-spinner"></span> Loading...';
+        userSince.innerHTML = '<span class="loading-spinner"></span> Member since: Loading...';
+        
+        fetch(`${API_URL}/user/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `${tokenType} ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch user info');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update user profile info
+          userName.textContent = data.full_name;
+          userEmail.textContent = data.email;
+          
+          // Format the date
+          const createdDate = new Date(data.created_at);
+          const options = { year: 'numeric', month: 'short', day: 'numeric' };
+          userSince.textContent = `Member since: ${createdDate.toLocaleDateString('en-US', options)}`;
+        })
+        .catch(error => {
+          console.error('Error fetching user info:', error);
+          userName.textContent = 'Error loading profile';
+          userEmail.textContent = 'Please try again later';
+          userSince.textContent = '';
+          
+          // If the token is invalid, log the user out
+          if (error.message.includes('401')) {
+            setTimeout(() => {
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('token_type');
+              alert('Your session has expired. Please log in again.');
+              location.reload();
+            }, 2000);
+          }
+        });
+      }
+      
+      // Add event listener for logout
+      logoutOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Clear authentication data
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('token_type');
+        
+        // Redirect to home page or show message
+        alert('You have been logged out successfully');
+        location.reload();
+      });
+      
+      // Add event listener for profile option
+      profileOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Profile management page coming soon!');
+        // Future implementation: redirect to profile page
+        // window.location.href = './profile.html';
+      });
+      
+      // Toggle dropdown menu
+      const userIcon = document.querySelector('.user-icon');
+      const dropdownMenu = document.querySelector('.dropdown-menu');
+      
+      userIcon.addEventListener('click', function() {
+        dropdownMenu.classList.toggle('show');
+      });
+      
+      // Close dropdown when clicking outside
+      window.addEventListener('click', function(e) {
+        if (!e.target.matches('.user-icon') && !e.target.matches('.user-icon i')) {
+          if (dropdownMenu.classList.contains('show')) {
+            dropdownMenu.classList.remove('show');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
