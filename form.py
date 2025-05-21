@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi import FastAPI, Request, Form, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -14,114 +14,103 @@ from fastapi import HTTPException, Body
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+# MySQL imports
 import mysql.connector
-from mysql.connector import pooling
-import contextlib
-from dotenv import load_dotenv
-import json
+from mysql.connector import Error
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship, Session
+from sqlalchemy.pool import QueuePool
 
-# Load environment variables
-load_dotenv()
-
-# Database Configuration
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "user": os.getenv("DB_USER", "root"),
-    "password": os.getenv("DB_PASSWORD", ""),
-    "database": os.getenv("DB_NAME", "foodlinker"),
-}
-
-# Create connection pool
-connection_pool = pooling.MySQLConnectionPool(
-    pool_name="foodlinker_pool",
-    pool_size=5,
-    **DB_CONFIG
-)
-
-# Context manager for database connections
-@contextlib.contextmanager
-def get_db_connection():
-    connection = connection_pool.get_connection()
-    try:
-        yield connection
-    finally:
-        connection.close()
-
-# Initialize database tables
-def init_db():
-    with get_db_connection() as connection:
-        cursor = connection.cursor()
-        
-        # Create donations table
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS donations (
-            id VARCHAR(36) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            description TEXT,
-            pickup_date DATE NOT NULL,
-            expiry_date DATE NOT NULL,
-            pickup_time VARCHAR(50) NOT NULL,
-            pickup_address TEXT NOT NULL,
-            contact_email VARCHAR(255) NOT NULL,
-            contact_phone VARCHAR(50) NOT NULL,
-            created_at DATETIME NOT NULL,
-            is_active BOOLEAN DEFAULT TRUE,
-            image_path VARCHAR(255)
-        )
-        """)
-        
-        # Create food_items table
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS food_items (
-            id VARCHAR(36) PRIMARY KEY,
-            donation_id VARCHAR(36) NOT NULL,
-            name VARCHAR(255) NOT NULL,
-            quantity INT NOT NULL,
-            unit VARCHAR(50) NOT NULL,
-            FOREIGN KEY (donation_id) REFERENCES donations(id) ON DELETE CASCADE
-        )
-        """)
-        
-        connection.commit()
-
-# Create directories if they don't exist
+# Create directory structure if it doesn't exist
 if not os.path.exists("static"):
     os.makedirs("static")
 if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")
-if not os.path.exists("templates"):
-    os.makedirs("templates")
 
 app = FastAPI()
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Static files and templates setup
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Setup templates
 templates = Jinja2Templates(directory="templates")
 
-# Email settings
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "your-email@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "your-app-password")
-EMAIL_FROM = os.getenv("EMAIL_FROM", "FoodLinker <your-email@gmail.com>")
+# Database configuration
+DATABASE_URL = "mysql+mysqlconnector://root:Arceus123Mewtow@localhost/foodlinker_db"
 
+# SQLAlchemy setup
+Base = declarative_base()
+
+# Define database models
+class FoodDonation(Base):
+    __tablename__ = "food_donations"
+    
+    id = Column(String(36), primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    pickup_date = Column(String(50), nullable=False)
+    expiry_date = Column(String(50), nullable=False)
+    pickup_time = Column(String(50), nullable=False)
+    pickup_address = Column(Text, nullable=False)
+    contact_email = Column(String(255), nullable=False)
+    contact_phone = Column(String(50), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+    is_active = Column(Boolean, default=True)
+    image_path = Column(String(255), nullable=True)
+    
+    # Relationship with FoodItem
+    items = relationship("FoodItem", back_populates="donation", cascade="all, delete-orphan")
+
+class FoodItem(Base):
+    __tablename__ = "food_items"
+    
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    donation_id = Column(String(36), ForeignKey("food_donations.id"), nullable=False)
+    name = Column(String(255), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit = Column(String(50), nullable=False)
+    
+    # Relationship with FoodDonation
+    donation = relationship("FoodDonation", back_populates="items")
+
+# Create engine and session
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,
+    max_overflow=20,
+    pool_recycle=3600,
+    pool_pre_ping=True,
+)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Create tables on app startup
 @app.on_event("startup")
 async def startup_event():
-    # Initialize database
-    init_db()
+    Base.metadata.create_all(bind=engine)
     
-    # Create HTML template if it doesn't exist
-    if not os.path.exists("templates/index.html"):
-        html_content = """
+    # Generate template files if they don't exist
+    if not os.path.exists("templates"):
+        os.makedirs("templates")
+        
+    html_content = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -242,7 +231,6 @@ async def startup_event():
         alert('Failed to submit form. Please try again.');
     }
 }
-
             
             // Upload image function
             async function uploadImage(donationId, file) {
@@ -300,46 +288,51 @@ async def startup_event():
         </script>
     </body>
     </html>
-        """
+    """
+    
+    # Create the HTML template file
+    if not os.path.exists("templates/index.html"):
         async with aiofiles.open("templates/index.html", "w") as f:
             await f.write(html_content)
     
-    # Create CSS file if it doesn't exist
+    # Create CSS file
+    css_content = """
+    /* CSS content */
+    body {
+        background-color: #f5f7fa;
+    }
+    
+    .container {
+        display: flex;
+    }
+    
+    /* Sidebar styling */
+    .sidebar {
+        width: 280px;
+        background-color: #2c3e50;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        color: #fff;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Rest of the CSS content... */
+    """
+    
     if not os.path.exists("static/form.css"):
-        css_content = """
-        /* CSS content */
-        body {
-            background-color: #f5f7fa;
-        }
-        
-        .container {
-            display: flex;
-        }
-        
-        /* Sidebar styling */
-        .sidebar {
-            width: 280px;
-            background-color: #2c3e50;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            color: #fff;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Rest of the CSS content... */
-        """
         async with aiofiles.open("static/form.css", "w") as f:
             await f.write(css_content)
 
-class FoodItem(BaseModel):
+# Pydantic models for request validation
+class FoodItemCreate(BaseModel):
     name: str
     quantity: int
     unit: str
 
-class Donation(BaseModel):
+class DonationCreate(BaseModel):
     title: str
     description: str
     pickup_date: str
@@ -348,7 +341,7 @@ class Donation(BaseModel):
     pickup_address: str
     contact_email: str
     contact_phone: str
-    items: List[FoodItem]
+    items: List[FoodItemCreate]
 
 class EmailRequest(BaseModel):
     donationId: str
@@ -360,234 +353,209 @@ class EmailRequest(BaseModel):
     requestMessage: Optional[str] = None
     timestamp: str
 
-# Route to serve the main HTML page
+# Email configuration
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "your-email@gmail.com"  
+EMAIL_HOST_PASSWORD = "your-app-password"  
+EMAIL_FROM = "FoodLinker <your-email@gmail.com>"
+
+# API Routes
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/api/donations/")
-async def create_donation(donation: Donation):
+async def create_donation(donation: DonationCreate, db: Session = Depends(get_db)):
     try:
+        # Create donation record
         donation_id = str(uuid.uuid4())
-        created_at = datetime.now()
         
-        with get_db_connection() as connection:
-            cursor = connection.cursor(dictionary=True)
-            
-            # Insert donation record
-            query = """
-            INSERT INTO donations 
-            (id, title, description, pickup_date, expiry_date, pickup_time, 
-            pickup_address, contact_email, contact_phone, created_at, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (
-                donation_id, 
-                donation.title, 
-                donation.description, 
-                donation.pickup_date, 
-                donation.expiry_date,
-                donation.pickup_time, 
-                donation.pickup_address, 
-                donation.contact_email, 
-                donation.contact_phone,
-                created_at,
-                True
+        db_donation = FoodDonation(
+            id=donation_id,
+            title=donation.title,
+            description=donation.description,
+            pickup_date=donation.pickup_date,
+            expiry_date=donation.expiry_date,
+            pickup_time=donation.pickup_time,
+            pickup_address=donation.pickup_address,
+            contact_email=donation.contact_email,
+            contact_phone=donation.contact_phone,
+            created_at=datetime.now(),
+            is_active=True,
+            image_path=None
+        )
+        
+        db.add(db_donation)
+        
+        # Create food items
+        for item in donation.items:
+            db_item = FoodItem(
+                donation_id=donation_id,
+                name=item.name,
+                quantity=item.quantity,
+                unit=item.unit
             )
-            cursor.execute(query, values)
-            
-            # Insert food items
-            for item in donation.items:
-                item_id = str(uuid.uuid4())
-                query = """
-                INSERT INTO food_items (id, donation_id, name, quantity, unit)
-                VALUES (%s, %s, %s, %s, %s)
-                """
-                values = (item_id, donation_id, item.name, item.quantity, item.unit)
-                cursor.execute(query, values)
-            
-            connection.commit()
+            db.add(db_item)
         
-        # Return donation data with generated ID
-        return {
-            "id": donation_id,
-            "title": donation.title,
-            "description": donation.description,
-            "pickup_date": donation.pickup_date,
-            "expiry_date": donation.expiry_date,
-            "pickup_time": donation.pickup_time,
-            "pickup_address": donation.pickup_address,
-            "contact_email": donation.contact_email,
-            "contact_phone": donation.contact_phone,
-            "created_at": created_at.isoformat(),
-            "is_active": True,
-            "image_path": None,
-            "items": [item.dict() for item in donation.items]
+        # Commit changes
+        db.commit()
+        db.refresh(db_donation)
+        
+        # Prepare response
+        response_dict = {
+            "id": db_donation.id,
+            "title": db_donation.title,
+            "description": db_donation.description,
+            "pickup_date": db_donation.pickup_date,
+            "expiry_date": db_donation.expiry_date,
+            "pickup_time": db_donation.pickup_time,
+            "pickup_address": db_donation.pickup_address,
+            "contact_email": db_donation.contact_email,
+            "contact_phone": db_donation.contact_phone,
+            "created_at": db_donation.created_at.isoformat(),
+            "is_active": db_donation.is_active,
+            "image_path": db_donation.image_path,
+            "items": [
+                {"name": item.name, "quantity": item.quantity, "unit": item.unit}
+                for item in db_donation.items
+            ]
         }
-    
+        
+        return response_dict
+        
     except Exception as e:
-        print(f"Error creating donation: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create donation: {str(e)}")
 
 @app.post("/api/donations/{donation_id}/upload-image")
-async def upload_image(donation_id: str, file: UploadFile = File(...)):
+async def upload_image(donation_id: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # Find the donation
+    donation = db.query(FoodDonation).filter(FoodDonation.id == donation_id).first()
+    
+    if not donation:
+        return JSONResponse(status_code=404, content={"message": "Donation not found"})
+    
+    # Process the uploaded file
+    file_extension = os.path.splitext(file.filename)[1]
+    new_filename = f"{donation_id}{file_extension}"
+    file_path = f"static/uploads/{new_filename}"
+    
     try:
-        # Check if donation exists
-        with get_db_connection() as connection:
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute("SELECT id FROM donations WHERE id = %s", (donation_id,))
-            donation = cursor.fetchone()
-            
-            if not donation:
-                return JSONResponse(status_code=404, content={"message": "Donation not found"})
-        
-        # Save file
-        file_extension = os.path.splitext(file.filename)[1]
-        new_filename = f"{donation_id}{file_extension}"
-        file_path = f"static/uploads/{new_filename}"
-        
+        # Save the file
         async with aiofiles.open(file_path, "wb") as out_file:
             content = await file.read()
             await out_file.write(content)
         
-        # Update image path in database
+        # Update the database with the image path
         image_url = f"/static/uploads/{new_filename}"
-        with get_db_connection() as connection:
-            cursor = connection.cursor()
-            cursor.execute(
-                "UPDATE donations SET image_path = %s WHERE id = %s",
-                (image_url, donation_id)
-            )
-            connection.commit()
+        donation.image_path = image_url
+        db.commit()
         
         return {"filename": new_filename, "image_url": image_url}
-    
+        
     except Exception as e:
-        print(f"Error uploading image: {e}")
-        raise HTTPException(status_code=500, detail=f"Error uploading image: {str(e)}")
+        db.rollback()
+        return JSONResponse(status_code=500, content={"message": f"Error uploading file: {str(e)}"})
 
 @app.get("/api/donations/")
-async def get_donations(active_only: bool = True):
+async def get_donations(active_only: bool = True, db: Session = Depends(get_db)):
     try:
-        with get_db_connection() as connection:
-            cursor = connection.cursor(dictionary=True)
-            
-            if active_only:
-                query = "SELECT * FROM donations WHERE is_active = TRUE ORDER BY created_at DESC"
-            else:
-                query = "SELECT * FROM donations ORDER BY created_at DESC"
-                
-            cursor.execute(query)
-            donations = cursor.fetchall()
-            
-            # Get food items for each donation
-            for donation in donations:
-                cursor.execute(
-                    "SELECT id, name, quantity, unit FROM food_items WHERE donation_id = %s",
-                    (donation["id"],)
-                )
-                donation["items"] = cursor.fetchall()
-            
-            return donations
-    
+        # Query donations based on active status
+        query = db.query(FoodDonation)
+        if active_only:
+            query = query.filter(FoodDonation.is_active == True)
+        
+        donations = query.all()
+        
+        # Format response
+        result = []
+        for donation in donations:
+            result.append({
+                "id": donation.id,
+                "title": donation.title,
+                "description": donation.description,
+                "pickup_date": donation.pickup_date,
+                "expiry_date": donation.expiry_date,
+                "pickup_time": donation.pickup_time,
+                "pickup_address": donation.pickup_address,
+                "contact_email": donation.contact_email,
+                "contact_phone": donation.contact_phone,
+                "created_at": donation.created_at.isoformat(),
+                "is_active": donation.is_active,
+                "image_path": donation.image_path,
+                "items": [
+                    {"name": item.name, "quantity": item.quantity, "unit": item.unit}
+                    for item in donation.items
+                ]
+            })
+        
+        return result
+        
     except Exception as e:
-        print(f"Error fetching donations: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch donations: {str(e)}")
 
 @app.get("/api/donations/{donation_id}")
-async def get_donation(donation_id: str):
+async def get_donation(donation_id: str, db: Session = Depends(get_db)):
     try:
-        with get_db_connection() as connection:
-            cursor = connection.cursor(dictionary=True)
-            
-            # Get donation details
-            cursor.execute("SELECT * FROM donations WHERE id = %s", (donation_id,))
-            donation = cursor.fetchone()
-            
-            if not donation:
-                return JSONResponse(status_code=404, content={"message": "Donation not found"})
-            
-            # Get food items
-            cursor.execute(
-                "SELECT id, name, quantity, unit FROM food_items WHERE donation_id = %s",
-                (donation_id,)
-            )
-            donation["items"] = cursor.fetchall()
-            
-            return donation
-    
+        # Query the specific donation
+        donation = db.query(FoodDonation).filter(FoodDonation.id == donation_id).first()
+        
+        if not donation:
+            return JSONResponse(status_code=404, content={"message": "Donation not found"})
+        
+        # Format response
+        result = {
+            "id": donation.id,
+            "title": donation.title,
+            "description": donation.description,
+            "pickup_date": donation.pickup_date,
+            "expiry_date": donation.expiry_date,
+            "pickup_time": donation.pickup_time, 
+            "pickup_address": donation.pickup_address,
+            "contact_email": donation.contact_email,
+            "contact_phone": donation.contact_phone,
+            "created_at": donation.created_at.isoformat(),
+            "is_active": donation.is_active,
+            "image_path": donation.image_path,
+            "items": [
+                {"name": item.name, "quantity": item.quantity, "unit": item.unit}
+                for item in donation.items
+            ]
+        }
+        
+        return result
+        
     except Exception as e:
-        print(f"Error fetching donation: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch donation: {str(e)}")
 
 @app.delete("/api/donations/{donation_id}")
-async def delete_donation(donation_id: str):
+async def delete_donation(donation_id: str, db: Session = Depends(get_db)):
     try:
-        with get_db_connection() as connection:
-            cursor = connection.cursor(dictionary=True)
-            
-            # Check if donation exists
-            cursor.execute("SELECT id, image_path FROM donations WHERE id = %s", (donation_id,))
-            donation = cursor.fetchone()
-            
-            if not donation:
-                return JSONResponse(status_code=404, content={"message": "Donation not found"})
-            
-            # Delete from database (foreign key cascade will delete food items)
-            cursor.execute("DELETE FROM donations WHERE id = %s", (donation_id,))
-            connection.commit()
-            
-            # Delete image file if it exists
-            if donation["image_path"]:
-                image_path = os.path.join(".", donation["image_path"][1:])  # Remove leading slash
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-            
-            return {"message": "Donation deleted successfully"}
-    
+        # Query the donation
+        donation = db.query(FoodDonation).filter(FoodDonation.id == donation_id).first()
+        
+        if not donation:
+            return JSONResponse(status_code=404, content={"message": "Donation not found"})
+        
+        # Delete associated food items (SQLAlchemy will handle this with cascade)
+        db.delete(donation)
+        db.commit()
+        
+        return {"message": "Donation deleted successfully"}
+        
     except Exception as e:
-        print(f"Error deleting donation: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete donation: {str(e)}")
 
-@app.post("/api/send-request-email/")
-async def send_request_email(request: EmailRequest = Body(...)):
-    try:
-        # Log the request information (for debugging)
-        print(f"Received request for donation: {request.donationId}")
-        print(f"From: {request.requesterName} ({request.requesterEmail})")
-        
-        # For development: Mock the email sending without actually connecting
-        # In production, uncomment and configure the SMTP section
-        """
-        # Create email message
-        message = MIMEMultipart()
-        message["From"] = EMAIL_FROM
-        message["To"] = request.donorEmail
-        message["Subject"] = f"New Food Request: {request.donationTitle}"
-        
-        # Email body
-        email_body = f"..."
-        
-        # Attach HTML content
-        message.attach(MIMEText(email_body, "html"))
-        
-        # Connect to SMTP server and send email
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
-            server.starttls()
-            server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-            server.send_message(message)
-        """
-        
-        # Instead, just log what would have been sent
-        print(f"Would send email to: {request.donorEmail}")
-        print(f"Email subject: New Food Request: {request.donationTitle}")
-        
-        # Return success response
-        return {"status": "success", "message": "Email request processed successfully"}
-    
-    except Exception as e:
-        print(f"Error in send_request_email: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to process email request: {str(e)}")
+# Email functionality commented out for now
+# @app.post("/api/send-request-email/")
+# async def send_request_email(request: EmailRequest = Body(...)):
+#     try:
+#         # Implementation goes here
+#         return {"status": "success", "message": "Email request processed successfully"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Failed to process email request: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("form:app", host="0.0.0.0", port=8000, reload=True)
