@@ -18,6 +18,7 @@ import mysql.connector
 from mysql.connector import pooling
 import contextlib
 from dotenv import load_dotenv
+import json
 
 # Load environment variables
 load_dotenv()
