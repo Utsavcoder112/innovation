@@ -1,0 +1,115 @@
+async function submitFoodRequest(donationId) {
+    const donation = allDonations.find(d => d.id === donationId);
+    const message = document.getElementById('requestMessage').value.trim();
+    
+    if (!donation) {
+        alert('Donation not found');
+        return;
+    }
+    
+    try {
+        // For now, we'll simulate the request by opening email client
+        // In a full implementation, you would send this to your backend
+        const subject = `Food Request: ${donation.title}`;
+        const body = `Hello ${donation.donor_name},
+
+I would like to request your food donation: ${donation.title}
+
+${message ? `Message: ${message}` : ''}
+
+Please let me know if this is still available.
+
+Best regards,
+${currentUser ? currentUser.full_name : 'Food Requester'}`;
+
+        const mailtoLink = `mailto:${donation.contact_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
+        
+        // Close the confirmation modal
+        closeRequestConfirmation();
+        
+        // Show success message
+        showNotification('Request sent successfully! The donor will be contacted via email.', 'success');
+        
+    } catch (error) {
+        console.error('Error submitting request:', error);
+        alert('Failed to submit request: ' + error.message);
+    }
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function showRequestConfirmation(donationId) {
+    const donation = allDonations.find(d => d.id === donationId);
+    
+    if (!donation) {
+        console.error('Donation not found:', donationId);
+        return;
+    }
+    
+    // Create and show confirmation modal
+    const confirmationModal = document.createElement('div');
+    confirmationModal.className = 'modal request-confirmation-modal';
+    confirmationModal.id = 'requestConfirmationModal';
+    
+    confirmationModal.innerHTML = `
+        <div class="modal-content confirmation-content">
+            <div class="modal-header">
+                <div class="modal-title">Confirm Food Request</div>
+                <span class="close-modal" onclick="closeRequestConfirmation()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>You are about to request the following food donation:</p>
+                <h3>${donation.title}</h3>
+                <p><strong>Donor:</strong> ${donation.donor_name}</p>
+                <p><strong>Pickup Address:</strong> ${donation.pickup_address}</p>
+                <p><strong>Contact:</strong> ${donation.contact_email}</p>
+                <p><strong>Phone:</strong> ${donation.contact_phone}</p>
+                <div class="request-form">
+                    <label for="requestMessage">Message to donor (optional):</label>
+                    <textarea id="requestMessage" placeholder="Let the donor know when you'll pick up the food or any special requirements..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeRequestConfirmation()">Cancel</button>
+                <button class="confirm-request-btn" onclick="submitFoodRequest('${donationId}')">Send Request</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmationModal);
+    confirmationModal.style.display = 'block';
+}
+
+// Close request confirmation modal
+function closeRequestConfirmation() {
+    const modal = document.getElementById('requestConfirmationModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.removeChild(modal);
+    }
+}

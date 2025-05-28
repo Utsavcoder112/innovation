@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annadan - Manage Listings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./foodlisting.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #fcc;
+        }
+
+        .success-message {
+            background-color: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #cfc;
+        }
+
+        .edit-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .edit-modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .items-section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .item-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+
+        .item-row input {
+            flex: 1;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .add-item-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar - Same as dashboard -->
+        <aside class="sidebar">
+            <div class="logo">
+                Annadan
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <a href="donar.html"><i class="fas fa-home"></i> Dashboard</a>
+                </div>
+                
+                <div class="menu-item dropdown active">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
+                    <div class="dropdown-menu show">
+                        <a href="../form.html">Add Food</a>
+                        <a href="#" class="active">Manage Listings</a>
+                        <a href="#">Food History</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="filterRequests('new')">New Requests</a>
+                        <a href="#" onclick="filterRequests('completed')">Completed</a>
+                        <a href="#" onclick="filterRequests('rejected')">Rejected</a>
+                        <a href="#" onclick="filterRequests('all')">All Requests</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
+                </div>
+                
+                <div class="menu-item">
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="../form.html" class="action-btn donate-btn"><i class="fas fa-plus-circle"></i> Donate Food</a>
+                <a href="../viewfood.html" class="action-btn request-btn"><i class="fas fa-hand-holding"></i> Request Food</a>
+                <a href="../viewfood.html" class="action-btn view-btn"><i class="fas fa-list-alt"></i> View All Foods</a>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" placeholder="Search foods..." id="sidebarSearch" onkeyup="searchFoods()">
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-role">Food Provider</div>
+                </div>
+                <i class="fas fa-ellipsis-v" style="color: rgba(255, 255, 255, 0.5); cursor: pointer;"></i>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="navbar">
+                <div class="page-title">
+                    <i class="fas fa-list-alt"></i>
+                    Manage Food Listings
+                </div>
+                <div class="navbar-right">
+                    <ul>
+                        <li><a href="../home.html">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Help Center</a></li>
+                    </ul>
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount">3</span>
+                    </div>
+                    <div class="notification-icon">
+                        <i class="fas fa-envelope"></i>
+                        <span class="notification-badge" id="messageCount">2</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Message Area -->
+                <div id="messageArea"></div>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="statusFilter">Status</label>
+                            <select id="statusFilter" class="filter-select" onchange="filterListings()">
+                                <option value="all">All Listings</option>
+                                <option value="active">Active Only</option>
+                                <option value="inactive">Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sortBy">Sort By</label>
+                            <select id="sortBy" class="filter-select" onchange="sortListings()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="expiry">Expiry Date</option>
+                                <option value="title">Title A-Z</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" style="flex: 1;">
+                            <label for="searchInput">Search</label>
+                            <input type="text" id="searchInput" class="search-input" 
+                                   placeholder="Search by title, description, or items..." 
+                                   oninput="searchListings()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listings Grid -->
+                <div id="listingsContainer" class="listings-grid">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading your food donations...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="deleteModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title">Confirm Deletion</div>
+                        <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this listing? This action cannot be undone and will remove all associated data.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                        <button class="confirm-btn" onclick="confirmDelete()">Delete Listing</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Modal -->
+            <div id="editModal" class="edit-modal">
+                <div class="edit-modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Food Donation</h3>
+                        <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                    </div>
+                    <form id="editForm">
+                        <div class="form-group">
+                            <label for="editTitle">Title</label>
+                            <input type="text" id="editTitle" name="title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editDescription">Description</label>
+                            <textarea id="editDescription" name="description" required></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editPickupDate">Pickup Date</label>
+                                <input type="date" id="editPickupDate" name="pickup_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editExpiryDate">Expiry Date</label>
+                                <input type="date" id="editExpiryDate" name="expiry_date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editPickupTime">Pickup Time</label>
+                            <input type="time" id="editPickupTime" name="pickup_time" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editPickupAddress">Pickup Address</label>
+                            <textarea id="editPickupAddress" name="pickup_address" required></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editContactEmail">Contact Email</label>
+                                <input type="email" id="editContactEmail" name="contact_email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editContactPhone">Contact Phone</label>
+                                <input type="tel" id="editContactPhone" name="contact_phone" required>
+                            </div>
+                        </div>
+
+                        <div class="items-section">
+                            <h4>Food Items</h4>
+                            <div id="editItemsContainer">
+                                <!-- Items will be populated here -->
+                            </div>
+                            <button type="button" class="add-item-btn" onclick="addEditItem()">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Donation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-logo">Annadan</div>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Support</a>
+                        <a href="#">About</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let allDonations = [];
+        let filteredDonations = [];
+        let currentEditId = null;
+        let currentDeleteId = null;
+        const API_BASE = 'http://localhost:8000';
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadUserInfo();
+            loadDonations();
+        });
+
+        // Authentication check
+        function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // Show message that user needs to be signed in
+        showMessage('Please sign in to manage your food listings', 'error');
+        displayEmptyState();
+        return false;
+    }
+    return true;
+}
+
+        // Get auth token for API calls
+        function getAuthToken() {
+    const token = localStorage.getItem('token');
+    return token || null; // Remove the Bearer prefix from here since it's added in API calls
+}
+
+        // Show messages
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="${type}-message">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // Load user info
+        async function loadUserInfo() {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            // Don't show user info if not authenticated
+            document.getElementById('userName').textContent = 'Guest User';
+            return;
+        }
+
+        const response = await fetch(`${API_BASE}/user/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+            document.getElementById('userName').textContent = user.full_name;
+        } else if (response.status === 401) {
+            localStorage.removeItem('token');
+            document.getElementById('userName').textContent = 'Guest User';
+            showMessage('Your session has expired. Please sign in again.', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading user info:', error);
+        document.getElementById('userName').textContent = 'Guest User';
+    }
+}
+
+        // Load donations from backend
+        async function loadDonations() {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            showMessage('Please sign in to view your food donations', 'error');
+            displayEmptyState();
+            return;
+        }
+
+        const response = await fetch(`${API_BASE}/api/donations/?my_donations=true`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            allDonations = await response.json();
+            filteredDonations = [...allDonations];
+            displayDonations();
+        } else if (response.status === 401) {
+            localStorage.removeItem('token');
+            showMessage('Your session has expired. Please sign in to view your donations.', 'error');
+            displayEmptyState();
+        } else {
+            throw new Error('Failed to load donations');
+        }
+    } catch (error) {
+        console.error('Error loading donations:', error);
+        showMessage('Error loading donations: ' + error.message, 'error');
+        displayEmptyState();
+    }
+}
+
+        // Display donations in grid
+        function displayDonations() {
+            const container = document.getElementById('listingsContainer');
+            
+            if (filteredDonations.length === 0) {
+                displayEmptyState();
+                return;
+            }
+
+            container.innerHTML = filteredDonations.map(donation => `
+                <div class="listing-card" data-id="${donation.id}">
+                    ${donation.image_path ? 
+                        `<img src="${API_BASE}${donation.image_path}" alt="Food" class="card-image" onerror="this.src='https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=200&fit=crop'">` :
+                        `<img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=200&fit=crop" alt="Food" class="card-image">`
+                    }
+                    <div class="listing-status status-${donation.is_active ? 'active' : 'inactive'}">
+                        ${donation.is_active ? 'Active' : 'Inactive'}
+                    </div>
+                    <div class="card-content">
+                        <div class="listing-title">${donation.title}</div>
+                        <div class="listing-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${donation.pickup_address.split(',')[0]}
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                ${getTimeAgo(donation.created_at)}
+                            </div>
+                        </div>
+                        <div class="listing-description">
+                            ${donation.description}
+                        </div>
+                        <div class="listing-items">
+                            <div class="items-title">Items included:</div>
+                            <div class="items-list">
+                                ${donation.items.map(item => `<span class="item-tag">${item.quantity} ${item.unit} ${item.name}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="listing-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                Pickup: ${new Date(donation.pickup_date).toLocaleDateString()} at ${donation.pickup_time}
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                Expires: ${new Date(donation.expiry_date).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn edit-btn" onclick="editListing('${donation.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="card-action-btn toggle-btn" onclick="toggleListing('${donation.id}')">
+                                <i class="fas fa-eye${donation.is_active ? '-slash' : ''}"></i> 
+                                ${donation.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="card-action-btn delete-btn" onclick="showDeleteModal('${donation.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Display empty state
+        function displayEmptyState() {
+    const container = document.getElementById('listingsContainer');
+    const token = getAuthToken();
+    
+    if (!token) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-sign-in-alt"></i>
+                <h3>Sign in required</h3>
+                <p>Please sign in to view and manage your food donations.</p>
+                <a href="../signin.html" class="btn btn-primary" style="margin-top: 20px;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </a>
+                <a href="../register.html" class="btn btn-secondary" style="margin-top: 10px; margin-left: 10px;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </a>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-utensils"></i>
+                <h3>No food donations found</h3>
+                <p>You haven't created any food donations yet. Start by adding your first donation!</p>
+                <a href="../form.html" class="btn btn-primary" style="margin-top: 20px;">
+                    <i class="fas fa-plus"></i> Add Food Donation
+                </a>
+            </div>
+        `;
+    }
+}
+
+        // Get time ago string
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+            
+            if (diffInHours < 1) return 'Just now';
+            if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            
+            const diffInDays = Math.floor(diffInHours / 24);
+            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+        }
+
+        // Edit listing
+        function editListing(donationId) {
+            if (!checkAuth()) return;
+            const donation = allDonations.find(d => d.id === donationId);
+    if (!donation) return;
+
+            currentEditId = donationId;
+
+            if (!checkAuth()) return;
+    
+
+            // Populate form
+            document.getElementById('editTitle').value = donation.title;
+            document.getElementById('editDescription').value = donation.description;
+            document.getElementById('editPickupDate').value = donation.pickup_date;
+            document.getElementById('editExpiryDate').value = donation.expiry_date;
+            document.getElementById('editPickupTime').value = donation.pickup_time;
+            document.getElementById('editPickupAddress').value = donation.pickup_address;
+            document.getElementById('editContactEmail').value = donation.contact_email;
+            document.getElementById('editContactPhone').value = donation.contact_phone;
+
+            // Populate items
+            populateEditItems(donation.items);
+
+            // Show modal
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Populate edit items
+        function populateEditItems(items) {
+            const container = document.getElementById('editItemsContainer');
+            container.innerHTML = items.map((item, index) => `
+                <div class="item-row">
+                    <input type="text" placeholder="Item name" value="${item.name}" name="item_name_${index}" required>
+                    <input type="number" placeholder="Quantity" value="${item.quantity}" name="item_quantity_${index}" min="1" required>
+                    <input type="text" placeholder="Unit (kg, pcs, etc.)" value="${item.unit}" name="item_unit_${index}" required>
+                    <button type="button" class="remove-item-btn" onclick="removeEditItem(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Add edit item
+        function addEditItem() {
+            const container = document.getElementById('editItemsContainer');
+            const index = container.children.length;
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.innerHTML = `
+                <input type="text" placeholder="Item name" name="item_name_${index}" required>
+                <input type="number" placeholder="Quantity" name="item_quantity_${index}" min="1" required>
+                <input type="text" placeholder="Unit (kg, pcs, etc.)" name="item_unit_${index}" required>
+                <button type="button" class="remove-item-btn" onclick="removeEditItem(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(itemRow);
+        }
+
+        // Remove edit item
+        function removeEditItem(button) {
+            const container = document.getElementById('editItemsContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                showMessage('At least one item is required', 'error');
+            }
+        }
+
+        // Handle edit form submission
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const items = [];
+            
+            // Collect items
+            const container = document.getElementById('editItemsContainer');
+            for (let i = 0; i < container.children.length; i++) {
+                const nameInput = container.children[i].querySelector(`input[name="item_name_${i}"]`);
+                const quantityInput = container.children[i].querySelector(`input[name="item_quantity_${i}"]`);
+                const unitInput = container.children[i].querySelector(`input[name="item_unit_${i}"]`);
+                
+                if (nameInput && quantityInput && unitInput) {
+                    items.push({
+                        name: nameInput.value.trim(),
+                        quantity: parseInt(quantityInput.value),
+                        unit: unitInput.value.trim()
+                    });
+                }
+            }
+
+            if (items.length === 0) {
+                showMessage('At least one item is required', 'error');
+                return;
+            }
+
+            const donationData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                pickup_date: formData.get('pickup_date'),
+                expiry_date: formData.get('expiry_date'),
+                pickup_time: formData.get('pickup_time'),
+                pickup_address: formData.get('pickup_address'),
+                contact_email: formData.get('contact_email'),
+                contact_phone: formData.get('contact_phone'),
+                items: items
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/api/donations/${currentEditId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify(donationData)
+                });
+
+                if (response.ok) {
+                    showMessage('Donation updated successfully!', 'success');
+                    closeEditModal();
+                    loadDonations(); // Reload to show updated data
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to update donation');
+                }
+            } catch (error) {
+                console.error('Error updating donation:', error);
+                showMessage('Error updating donation: ' + error.message, 'error');
+            }
+        });
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+        }
+
+        // Toggle listing active/inactive
+        async function toggleListing(donationId) {
+            if (!checkAuth()) return;
+            const donation = allDonations.find(d => d.id === donationId);
+    if (!donation) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/donations/${donationId}/toggle`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage(`Donation ${donation.is_active ? 'deactivated' : 'activated'} successfully!`, 'success');
+                    loadDonations(); // Reload to show updated status
+                } else {
+                    throw new Error('Failed to toggle donation status');
+                }
+            } catch (error) {
+                console.error('Error toggling donation:', error);
+                showMessage('Error updating donation status: ' + error.message, 'error');
+            }
+        }
+
+        // Show delete modal
+        function showDeleteModal(donationId) {
+            if (!checkAuth()) return;
+            ccurrentDeleteId = donationId;
+    document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            currentDeleteId = null;
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/donations/${currentDeleteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('Donation deleted successfully!', 'success');
+                    closeDeleteModal();
+                    loadDonations(); // Reload to show updated list
+                } else {
+                    throw new Error('Failed to delete donation');
+                }
+            } catch (error) {
+                console.error('Error deleting donation:', error);
+                showMessage('Error deleting donation: ' + error.message, 'error');
+            }
+        }
+
+        // Filter listings
+        function filterListings() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredDonations = allDonations.filter(donation => {
+                if (statusFilter === 'all') return true;
+                if (statusFilter === 'active') return donation.is_active;
+                if (statusFilter === 'inactive') return !donation.is_active;
+                return true;
+            });
+
+            displayDonations();
+        }
+
+        // Sort listings
+        function sortListings() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            filteredDonations.sort((a, b) => {
+                switch (sortBy) {
+                    case 'newest':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'oldest':
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    case 'expiry':
+                        return new Date(a.expiry_date) - new Date(b.expiry_date);
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    default:
+                        return 0;
+                }
+            });
+
+            displayDonations();
+        }
+
+        // Search listings
+        function searchListings() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                filteredDonations = [...allDonations];
+            } else {
+                filteredDonations = allDonations.filter(donation => {
+                    const searchableText = [
+                        donation.title,
+                        donation.description,
+                        donation.pickup_address,
+                        ...donation.items.map(item => `${item.name} ${item.unit}`)
+                    ].join(' ').toLowerCase();
+                    
+                    return searchableText.includes(searchTerm);
+                });
+            }
+
+            // Apply current filters
+            filterListings();
+        }
+
+        // Search foods (for sidebar search)
+        function searchFoods() {
+            const searchTerm = document.getElementById('sidebarSearch').value.toLowerCase().trim();
+            searchListings(); // Use the same search functionality
+        }
+
+        // Filter requests (for sidebar navigation)
+        function filterRequests(status) {
+            // Redirect to requests page with filter
+            window.location.href = `requests.html?filter=${status}`;
+        }
+
+        // Handle dropdown menus
+        document.addEventListener('click', function(e) {
+            // Close dropdowns when clicking outside
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Dropdown toggle functionality
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const dropdown = this.parentElement;
+                const menu = dropdown.querySelector('.dropdown-menu');
+                
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.classList.remove('show');
+                    }
+                });
+                
+                // Toggle current dropdown
+                menu.classList.toggle('show');
+            });
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
+            
+            if (e.target === editModal) {
+                closeEditModal();
+            }
+            if (e.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
+        // Handle ESC key to close modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditModal();
+                closeDeleteModal();
+            }
+        });
+
+        // Auto-refresh donations every 5 minutes
+        setInterval(loadDonations, 5 * 60 * 1000);
+
+        // Handle logout (if logout button is added)
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '../signin.html';
+        }
+
+        // Utility function to format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Utility function to format time for display
+        function formatTime(timeString) {
+            const time = new Date(`2000-01-01T${timeString}`);
+            return time.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Export functions for external use if needed
+        window.foodListingManager = {
+            loadDonations,
+            editListing,
+            toggleListing,
+            showDeleteModal,
+            filterListings,
+            sortListings,
+            searchListings,
+            logout
+        };
+
+</script>
+</body>
+</html>

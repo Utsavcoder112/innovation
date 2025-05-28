@@ -18,11 +18,46 @@
         box-sizing: border-box;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
+
+      .auth-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 15px;
+        margin: 20px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+      }
+
+      .auth-warning a {
+        color: #856404;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      .auth-warning a:hover {
+        text-decoration: underline;
+      }
+
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
     </style>
   </head>
   <body>
+    <!-- Authentication Warning -->
+    <div class="auth-warning" id="authWarning">
+      <p><i class="fas fa-exclamation-triangle"></i> You need to be logged in to submit a donation. <a href="./signin.html">Sign In</a> or <a href="./register.html">Register</a></p>
+    </div>
+
     <div class="container">
-      <!-- Sidebar -->
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="logo">Annadan</div>
@@ -81,12 +116,12 @@
           <input type="text" placeholder="Search foods..." />
         </div>
 
-        <div class="user-profile">
+        <div class="user-profile" id="userProfile">
           <div class="user-avatar">
             <i class="fas fa-user"></i>
           </div>
           <div class="user-info">
-            <div class="user-name">John Donor</div>
+            <div class="user-name" id="userName">Loading...</div>
             <div class="user-role">Food Provider</div>
           </div>
           <i
@@ -273,7 +308,7 @@
           </div>
 
           <div class="form-footer">
-            <button type="button" class="submit-btn" onclick="submitForm()">
+            <button type="button" class="submit-btn" id="submitBtn" onclick="submitForm()">
               <i class="fas fa-paper-plane"></i> List Food Donation
             </button>
           </div>
@@ -304,23 +339,79 @@
     </div>
 
     <script>
+      const API_BASE_URL = 'http://127.0.0.1:8000';
+
+      // Check authentication status on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+      });
+
+      // Check if user is authenticated
+      async function checkAuthStatus() {
+        const token = localStorage.getItem('access_token');
         
+        if (!token) {
+          showAuthWarning();
+          return false;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/user/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            // Token is invalid or expired
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('token_type');
+            showAuthWarning();
+            return false;
+          }
+
+          const userData = await response.json();
+          updateUserProfile(userData);
+          hideAuthWarning();
+          return true;
+
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          showAuthWarning();
+          return false;
+        }
+      }
+
+      function showAuthWarning() {
+        document.getElementById('authWarning').style.display = 'block';
+        document.querySelector('.form-container').style.display = 'none';
+      }
+
+      function hideAuthWarning() {
+        document.getElementById('authWarning').style.display = 'none';
+        document.querySelector('.form-container').style.display = 'block';
+      }
+
+      function updateUserProfile(userData) {
+        document.getElementById('userName').textContent = userData.full_name;
+      }
+
       // Add new food item
       function addFoodItem() {
         const container = document.getElementById("food-items-container");
         const foodItem = document.createElement("div");
         foodItem.className = "food-item";
         foodItem.innerHTML = `
-                <input type="text" name="item[]" placeholder="Enter food item name" required>
-                <input type="number" name="quantity[]" placeholder="Qty" min="1" style="width: 80px; margin: 0 10px;" required>
-                <select name="unit[]" style="width: 100px;">
-                    <option value="pieces">Pieces</option>
-                    <option value="servings">Servings</option>
-                    <option value="kg">Kg</option>
-                    <option value="lb">lb</option>
-                </select>
-                <button type="button" onclick="removeItem(this)"><i class="fas fa-times"></i></button>
-            `;
+          <input type="text" name="item[]" placeholder="Enter food item name" required>
+          <input type="number" name="quantity[]" placeholder="Qty" min="1" style="width: 80px; margin: 0 10px;" required>
+          <select name="unit[]" style="width: 100px;">
+            <option value="pieces">Pieces</option>
+            <option value="servings">Servings</option>
+            <option value="kg">Kg</option>
+            <option value="lb">lb</option>
+          </select>
+          <button type="button" onclick="removeItem(this)"><i class="fas fa-times"></i></button>
+        `;
         container.appendChild(foodItem);
       }
 
@@ -337,39 +428,113 @@
         preview.src = URL.createObjectURL(event.target.files[0]);
       }
 
-      // Submit form
-  async function uploadImage(donationId, file) {
-    const formData = new FormData();
-    formData.append('file', file);
+      // Upload image function
+      async function uploadImage(donationId, file) {
+        const token = localStorage.getItem('access_token');
+        const formData = new FormData();
+        formData.append('file', file);
 
-    const response = await fetch(`http://127.0.0.1:8000/api/donations/${donationId}/upload-image`, {
-        method: 'POST',
-        body: formData
-    });
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/donations/${donationId}/upload-image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
 
-    if (!response.ok) {
-        throw new Error('Failed to upload image');
-    }
+          if (!response.ok) {
+            throw new Error('Failed to upload image');
+          }
 
-    return await response.json();
-}
+          return await response.json();
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          return null;
+        }
+      }
 
-  async function submitForm() {
-    try {
-        // Form data
-        const foodTitle = document.getElementById('foodTitle').value;
-        const description = document.getElementById('description').value;
-        const pickupDate = document.getElementById('pickupDate').value;
-        const expiryDate = document.getElementById('expiryDate').value;
-        const pickupTime = document.getElementById('pickupTime').value;
-        const pickupAddress = document.getElementById('pickupAddress').value;
-        const contactEmail = document.getElementById('contactEmail').value;
-        const contactPhone = document.getElementById('contactPhone').value;
+      // Collect food items from form
+      function collectFoodItems() {
+        const foodItems = [];
+        const itemContainers = document.querySelectorAll('.food-item');
         
-        const foodItems = []; // Gather food items
+        itemContainers.forEach(container => {
+          const itemName = container.querySelector('input[name="item[]"]').value.trim();
+          const quantity = parseInt(container.querySelector('input[name="quantity[]"]').value);
+          const unit = container.querySelector('select[name="unit[]"]').value;
+          
+          if (itemName && quantity && quantity > 0) {
+            foodItems.push({
+              name: itemName,
+              quantity: quantity,
+              unit: unit
+            });
+          }
+        });
+        
+        return foodItems;
+      }
 
-        // Create donation object
-        const donation = {
+      // Submit form
+      async function submitForm() {
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+          alert('Please log in to submit a donation');
+          return;
+        }
+
+        // Check authentication before submitting
+        const isAuthenticated = await checkAuthStatus();
+        if (!isAuthenticated) {
+          alert('Your session has expired. Please log in again.');
+          return;
+        }
+
+        // Disable submit button and show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+        try {
+          // Collect form data
+          const foodTitle = document.getElementById('foodTitle').value.trim();
+          const description = document.getElementById('description').value.trim();
+          const pickupDate = document.getElementById('pickupDate').value;
+          const expiryDate = document.getElementById('expiryDate').value;
+          const pickupTime = document.getElementById('pickupTime').value;
+          const pickupAddress = document.getElementById('pickupAddress').value.trim();
+          const contactEmail = document.getElementById('contactEmail').value.trim();
+          const contactPhone = document.getElementById('contactPhone').value.trim();
+          
+          // Collect food items
+          const foodItems = collectFoodItems();
+          
+          if (foodItems.length === 0) {
+            alert('Please add at least one food item');
+            return;
+          }
+
+          // Validate dates
+          const pickupDateObj = new Date(pickupDate);
+          const expiryDateObj = new Date(expiryDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          if (pickupDateObj < today) {
+            alert('Pickup date cannot be in the past');
+            return;
+          }
+
+          if (expiryDateObj <= pickupDateObj) {
+            alert('Expiry date must be after pickup date');
+            return;
+          }
+
+          // Create donation object
+          const donation = {
             title: foodTitle,
             description: description,
             pickup_date: pickupDate,
@@ -379,53 +544,102 @@
             contact_email: contactEmail,
             contact_phone: contactPhone,
             items: foodItems
-        };
+          };
 
-        console.log('Sending donation:', donation); // Log the donation object
+          console.log('Sending donation:', donation);
 
-        // POST request
-        const response = await fetch('http://127.0.0.1:8000/api/donations/', {
+          // Submit donation
+          const response = await fetch(`${API_BASE_URL}/api/donations/`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(donation)
-        });
+          });
 
-        if (!response.ok) {
-            throw new Error('Failed to submit donation'); // Throw error if response is not OK
-        }
+          if (!response.ok) {
+            if (response.status === 401) {
+              alert('Your session has expired. Please log in again.');
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('token_type');
+              window.location.reload();
+              return;
+            }
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to submit donation');
+          }
 
-        const result = await response.json(); // Parse the response
-        console.log('Donation successful:', result); // Log the result
+          const result = await response.json();
+          console.log('Donation successful:', result);
 
-        // Proceed with file upload (if applicable)
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput.files.length > 0) {
-            await uploadImage(result.id, fileInput.files[0]);
-        }
+          // Handle file upload if a file was selected
+          const fileInput = document.getElementById('fileInput');
+          if (fileInput && fileInput.files.length > 0) {
+            try {
+              await uploadImage(result.id, fileInput.files[0]);
+              console.log('Image uploaded successfully');
+            } catch (error) {
+              console.error('Image upload failed:', error);
+              // Don't fail the whole process if image upload fails
+            }
+          }
 
-        // Show success message
-        const successMessage = document.getElementById('successMessage');
-        successMessage.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+          // Show success message
+          const successMessage = document.getElementById('successMessage');
+          successMessage.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Reset the form
-        document.getElementById('foodForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
+          // Reset the form
+          document.getElementById('foodForm').reset();
+          document.getElementById('imagePreview').style.display = 'none';
+          
+          // Reset food items container to have just one item
+          const container = document.getElementById('food-items-container');
+          container.innerHTML = `
+            <div class="food-item">
+              <input type="text" name="item[]" placeholder="Enter food item name" required>
+              <input type="number" name="quantity[]" placeholder="Qty" min="1" style="width: 80px; margin: 0 10px" required>
+              <select name="unit[]" style="width: 100px">
+                <option value="pieces">Pieces</option>
+                <option value="servings">Servings</option>
+                <option value="kg">Kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+          `;
 
-        // Hide the success message after 3 seconds
-        setTimeout(() => {
+          // Hide the success message after 5 seconds
+          setTimeout(() => {
             successMessage.style.display = 'none';
-        }, 3000);
+          }, 5000);
 
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to submit form. Please try again.');
-    }
-}
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Failed to submit donation: ' + error.message);
+        } finally {
+          // Re-enable submit button
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      }
 
-      
+      // Set minimum date for pickup and expiry date inputs
+      document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('pickupDate').min = today;
+        document.getElementById('expiryDate').min = today;
+        
+        // Update expiry date minimum when pickup date changes
+        document.getElementById('pickupDate').addEventListener('change', function() {
+          const pickupDate = this.value;
+          if (pickupDate) {
+            const nextDay = new Date(pickupDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            document.getElementById('expiryDate').min = nextDay.toISOString().split('T')[0];
+          }
+        });
+      });
     </script>
   </body>
 </html>

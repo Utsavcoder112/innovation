@@ -14,10 +14,76 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-value.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Error states */
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Success animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Real-time update indicator */
+        .update-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .update-indicator.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
+    <div class="update-indicator" id="updateIndicator">
+        <i class="fas fa-sync-alt"></i> Dashboard Updated
+    </div>
+
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -33,7 +99,7 @@
                     <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
                     <div class="dropdown-menu">
                         <a href="../form.html">Add Food</a>
-                        <a href="#">Manage Listings</a>
+                        <a href="../donar-edit/foodlisting.html">Manage Listings</a>
                         <a href="#">Food History</a>
                     </div>
                 </div>
@@ -41,10 +107,10 @@
                 <div class="menu-item dropdown">
                     <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
                     <div class="dropdown-menu">
-                        <a href="#">New Requests</a>
-                        <a href="#">Completed</a>
-                        <a href="#">Rejected</a>
-                        <a href="#">All Requests</a>
+                        <a href="../request.html" onclick="filterRequests('new')">New Requests</a>
+                        <a href="#" onclick="filterRequests('completed')">Completed</a>
+                        <a href="#" onclick="filterRequests('rejected')">Rejected</a>
+                        <a href="#" onclick="filterRequests('all')">All Requests</a>
                     </div>
                 </div>
                 
@@ -64,7 +130,7 @@
             </div>
             
             <div class="search-box">
-                <input type="text" placeholder="Search foods...">
+                <input type="text" placeholder="Search foods..." id="searchInput" onkeyup="searchFoods()">
             </div>
             
             <div class="user-profile">
@@ -72,7 +138,7 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="user-info">
-                    <div class="user-name">John Donor</div>
+                    <div class="user-name" id="userName">Loading...</div>
                     <div class="user-role">Food Provider</div>
                 </div>
                 <i class="fas fa-ellipsis-v" style="color: rgba(255, 255, 255, 0.5); cursor: pointer;"></i>
@@ -93,11 +159,11 @@
                     </ul>
                     <div class="notification-icon">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
+                        <span class="notification-badge" id="notificationCount">0</span>
                     </div>
                     <div class="notification-icon">
                         <i class="fas fa-envelope"></i>
-                        <span class="notification-badge">2</span>
+                        <span class="notification-badge" id="messageCount">0</span>
                     </div>
                 </div>
             </header>
@@ -113,9 +179,11 @@
                                 <i class="fas fa-utensils"></i>
                             </div>
                         </div>
-                        <div class="stat-value">12</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 25% from last week
+                        <div class="stat-value" id="totalFoodCount">
+                            <div class="loading"></div>
+                        </div>
+                        <div class="stat-change" id="totalFoodChange">
+                            <i class="fas fa-arrow-up"></i> Calculating...
                         </div>
                     </div>
                     
@@ -126,9 +194,11 @@
                                 <i class="fas fa-hand-holding-heart"></i>
                             </div>
                         </div>
-                        <div class="stat-value">8</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 12% from last week
+                        <div class="stat-value" id="requestCount">
+                            <div class="loading"></div>
+                        </div>
+                        <div class="stat-change" id="requestChange">
+                            <i class="fas fa-arrow-up"></i> Calculating...
                         </div>
                     </div>
                     
@@ -139,22 +209,26 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                         </div>
-                        <div class="stat-value">5</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 18% from last week
+                        <div class="stat-value" id="completedCount">
+                            <div class="loading"></div>
+                        </div>
+                        <div class="stat-change" id="completedChange">
+                            <i class="fas fa-arrow-up"></i> Calculating...
                         </div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-header">
-                            <div class="stat-title">Impact (Meals)</div>
+                            <div class="stat-title">Impact (People Fed)</div>
                             <div class="stat-icon orange">
                                 <i class="fas fa-heart"></i>
                             </div>
                         </div>
-                        <div class="stat-value">27</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 20% from last week
+                        <div class="stat-value" id="impactCount">
+                            <div class="loading"></div>
+                        </div>
+                        <div class="stat-change" id="impactChange">
+                            <i class="fas fa-arrow-up"></i> Calculating...
                         </div>
                     </div>
                 </div>
@@ -162,80 +236,13 @@
                 <!-- Latest Food Listings -->
                 <div class="section-title">
                     Latest Listed Food
-                    <a href="#" class="view-all-link">View All</a>
+                    <a href="#" class="view-all-link" onclick="loadAllFoods()">View All</a>
                 </div>
                 
-                <div class="food-listings">
-                    <div class="food-card">
-                        <img src="/api/placeholder/400/200" alt="Fresh Vegetables" class="food-image">
-                        <div class="food-details">
-                            <div class="food-name">Fresh Vegetable Bundle</div>
-                            <div class="food-meta">
-                                <span><i class="fas fa-map-marker-alt"></i> Downtown</span>
-                                <span><i class="fas fa-clock"></i> Today</span>
-                            </div>
-                            <div class="food-description">
-                                A bundle of fresh vegetables including carrots, tomatoes, and leafy greens. Perfect for a family meal.
-                            </div>
-                            <div class="food-footer">
-                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 3 days</span>
-                                <a href="#" class="food-action">Details</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="food-card">
-                        <img src="/api/placeholder/400/200" alt="Bread and Pastries" class="food-image">
-                        <div class="food-details">
-                            <div class="food-name">Bakery Goods</div>
-                            <div class="food-meta">
-                                <span><i class="fas fa-map-marker-alt"></i> Westside</span>
-                                <span><i class="fas fa-clock"></i> Yesterday</span>
-                            </div>
-                            <div class="food-description">
-                                Assorted bread and pastries from local bakery. Still fresh and delicious!
-                            </div>
-                            <div class="food-footer">
-                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires tomorrow</span>
-                                <a href="#" class="food-action">Details</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="food-card">
-                        <img src="/api/placeholder/400/200" alt="Canned Goods" class="food-image">
-                        <div class="food-details">
-                            <div class="food-name">Canned Food Package</div>
-                            <div class="food-meta">
-                                <span><i class="fas fa-map-marker-alt"></i> Eastside</span>
-                                <span><i class="fas fa-clock"></i> 2 days ago</span>
-                            </div>
-                            <div class="food-description">
-                                Variety of canned foods including beans, soup, and vegetables. Long shelf life.
-                            </div>
-                            <div class="food-footer">
-                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 6 months</span>
-                                <a href="#" class="food-action">Details</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="food-card">
-                        <img src="/api/placeholder/400/200" alt="Fruit Basket" class="food-image">
-                        <div class="food-details">
-                            <div class="food-name">Fresh Fruit Basket</div>
-                            <div class="food-meta">
-                                <span><i class="fas fa-map-marker-alt"></i> North Area</span>
-                                <span><i class="fas fa-clock"></i> Today</span>
-                            </div>
-                            <div class="food-description">
-                                Seasonal fruits including apples, oranges, and bananas. Great source of vitamins.
-                            </div>
-                            <div class="food-footer">
-                                <span class="food-expiry"><i class="fas fa-calendar-alt"></i> Expires in 5 days</span>
-                                <a href="#" class="food-action">Details</a>
-                            </div>
-                        </div>
+                <div class="food-listings" id="foodListings">
+                    <div class="loading-placeholder">
+                        <div class="loading"></div>
+                        <p>Loading your food listings...</p>
                     </div>
                 </div>
             </div>
@@ -263,6 +270,312 @@
     </div>
     
     <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8000';
+        let currentUser = null;
+        let dashboardData = {
+            donations: [],
+            requests: [],
+            stats: {}
+        };
+        
+        // Authentication helper
+        function getAuthToken() {
+            return localStorage.getItem('access_token');
+        }
+        
+        function getAuthHeaders() {
+            const token = getAuthToken();
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+        
+        // API calls
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/me`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                } else {
+                    throw new Error('Failed to fetch user info');
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                document.getElementById('userName').textContent = 'User';
+            }
+        }
+        
+        async function fetchDashboardStats() {
+            try {
+                // Fetch donations
+                const donationsResponse = await fetch(`${API_BASE_URL}/api/donations/?my_donations=true`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (donationsResponse.ok) {
+                    dashboardData.donations = await donationsResponse.json();
+                } else {
+                    throw new Error('Failed to fetch donations');
+                }
+                
+                // Fetch requests
+                const requestsResponse = await fetch(`${API_BASE_URL}/api/requests/`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (requestsResponse.ok) {
+                    dashboardData.requests = await requestsResponse.json();
+                } else {
+                    throw new Error('Failed to fetch requests');
+                }
+                
+                // Calculate stats
+                calculateStats();
+                updateStatsDisplay();
+                
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+                showError('Failed to load dashboard statistics');
+            }
+        }
+        
+        function calculateStats() {
+            const donations = dashboardData.donations;
+            const requests = dashboardData.requests;
+            
+            // Total food listings
+            const totalFood = donations.length;
+            const activeFoodCount = donations.filter(d => d.is_active).length;
+            
+            // Request counts
+            const totalRequests = requests.length;
+            const completedRequests = requests.filter(r => r.status === 'accepted').length;
+            const pendingRequests = requests.filter(r => r.status === 'pending').length;
+            
+            // Impact calculation (estimate people fed based on completed requests)
+            let totalImpact = 0;
+            requests.filter(r => r.status === 'accepted').forEach(request => {
+                const donation = donations.find(d => d.id === request.donation_id);
+                if (donation && donation.items) {
+                    // Rough estimate: each donation can feed 2-4 people on average
+                    const itemCount = donation.items.reduce((sum, item) => sum + item.quantity, 0);
+                    totalImpact += Math.max(2, Math.min(6, itemCount));
+                }
+            });
+            
+            dashboardData.stats = {
+                totalFood,
+                activeFoodCount,
+                totalRequests,
+                completedRequests,
+                pendingRequests,
+                totalImpact
+            };
+            
+            // Update notification badges
+            document.getElementById('notificationCount').textContent = pendingRequests;
+            document.getElementById('messageCount').textContent = Math.min(pendingRequests, 9);
+        }
+        
+        function updateStatsDisplay() {
+            const stats = dashboardData.stats;
+            
+            // Update stat values with animation
+            animateStatValue('totalFoodCount', stats.totalFood);
+            animateStatValue('requestCount', stats.totalRequests);
+            animateStatValue('completedCount', stats.completedRequests);
+            animateStatValue('impactCount', stats.totalImpact);
+            
+            // Update change indicators (simplified - showing positive trends)
+            updateStatChange('totalFoodChange', 'Total active listings', 'up');
+            updateStatChange('requestChange', 'New requests this week', 'up');
+            updateStatChange('completedChange', 'Successful donations', 'up');
+            updateStatChange('impactChange', 'People helped', 'up');
+        }
+        
+        function animateStatValue(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = targetValue;
+            // element.classList.add('fade-in');
+        }
+        
+        function updateStatChange(elementId, description, trend) {
+            const element = document.getElementById(elementId);
+            const icon = trend === 'up' ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
+            const color = trend === 'up' ? '#2ecc71' : '#e74c3c';
+            
+            element.innerHTML = `<i class="${icon}" style="color: ${color}"></i> ${description}`;
+        }
+        
+        async function fetchLatestFoodListings() {
+            try {
+                const donations = dashboardData.donations.slice(0, 4); // Show latest 4
+                const foodListingsContainer = document.getElementById('foodListings');
+                
+                if (donations.length === 0) {
+                    foodListingsContainer.innerHTML = `
+                        <div class="no-data">
+                            <i class="fas fa-utensils" style="font-size: 48px; color: #bdc3c7; margin-bottom: 16px;"></i>
+                            <p>No food listings yet. <a href="../form.html">Create your first donation</a>!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let foodHTML = '';
+                donations.forEach(donation => {
+                    const expiryDate = new Date(donation.expiry_date);
+                    const today = new Date();
+                    const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    const expiryText = daysUntilExpiry > 0 
+                        ? `Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}` 
+                        : 'Expired';
+                    
+                    const itemsText = donation.items && donation.items.length > 0
+                        ? donation.items.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ')
+                        : 'Food items';
+                    
+                    const imageUrl = donation.image_path || '/api/placeholder/400';
+                    
+                    foodHTML += `
+                        <div class="food-card fade-in">
+                            <img src="${imageUrl}" alt="${donation.title}" class="food-image" 
+                                 onerror="this.src='/api/placeholder/400">
+                            <div class="food-details">
+                                <div class="food-name">${donation.title}</div>
+                                <div class="food-meta">
+                                    <span><i class="fas fa-map-marker-alt"></i> ${donation.pickup_address.split(',')[0] || 'Location'}</span>
+                                    <span><i class="fas fa-clock"></i> ${formatDate(donation.created_at)}</span>
+                                </div>
+                                <div class="food-description">
+                                    ${donation.description.length > 100 
+                                        ? donation.description.substring(0, 100) + '...' 
+                                        : donation.description}
+                                </div>
+                                <div class="food-items">
+                                    <small><i class="fas fa-list"></i> ${itemsText}</small>
+                                </div>
+                                <div class="food-footer">
+                                    <span class="food-expiry ${daysUntilExpiry <= 1 ? 'urgent' : ''}">
+                                        <i class="fas fa-calendar-alt"></i> ${expiryText}
+                                    </span>
+                                    <a href="#" class="food-action" onclick="viewDonationDetails('${donation.id}')">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                foodListingsContainer.innerHTML = foodHTML;
+                
+            } catch (error) {
+                console.error('Error loading food listings:', error);
+                document.getElementById('foodListings').innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load food listings. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const diffTime = today - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return date.toLocaleDateString();
+        }
+        
+        function showError(message) {
+            console.error(message);
+            // You could show a toast notification here
+        }
+        
+        function showUpdateIndicator() {
+            const indicator = document.getElementById('updateIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Event handlers
+        function searchFoods() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const foodCards = document.querySelectorAll('.food-card');
+            
+            foodCards.forEach(card => {
+                const title = card.querySelector('.food-name').textContent.toLowerCase();
+                const description = card.querySelector('.food-description').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        function filterRequests(status) {
+            // This would navigate to a requests page with the filter applied
+            console.log('Filtering requests by:', status);
+        }
+        
+        function viewDonationDetails(donationId) {
+            // This would open a modal or navigate to a details page
+            console.log('Viewing donation details for:', donationId);
+        }
+        
+        function loadAllFoods() {
+            // This would navigate to a page showing all food listings
+            console.log('Loading all foods');
+        }
+        
+        // Auto-refresh functionality
+        function startAutoRefresh() {
+            setInterval(async () => {
+                await fetchDashboardStats();
+                await fetchLatestFoodListings();
+                showUpdateIndicator();
+            }, 30000); // Refresh every 30 seconds
+        }
+        
+        // Initialize dashboard
+        async function initializeDashboard() {
+            try {
+                // Check if user is authenticated
+                if (!getAuthToken()) {
+                    window.location.href = '../signin.html';
+                    return;
+                }
+                
+                // Load all data
+                await fetchUserInfo();
+                await fetchDashboardStats();
+                await fetchLatestFoodListings();
+                
+                // Start auto-refresh
+                startAutoRefresh();
+                
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                showError('Failed to load dashboard. Please refresh the page.');
+            }
+        }
+        
         // Toggle dropdown menus
         document.addEventListener('DOMContentLoaded', function() {
             const dropdowns = document.querySelectorAll('.dropdown-toggle');
@@ -282,6 +595,9 @@
                     }
                 });
             });
+            
+            // Initialize the dashboard
+            initializeDashboard();
         });
     </script>
 </body>
