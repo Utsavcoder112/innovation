@@ -18,6 +18,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from enum import Enum
+from contextlib import asynccontextmanager
 
 # MySQL imports
 import mysql.connector
@@ -33,7 +34,8 @@ if not os.path.exists("static"):
 if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")
 
-app = FastAPI()
+# app = FastAPI()
+app = FastAPI(lifespan="lifespan")
 
 # CORS middleware - Updated to handle specific frontend requirements
 app.add_middleware(
@@ -307,13 +309,24 @@ async def options_handler():
     )
 
 # Create tables on app startup
-@app.on_event("startup")
-async def startup_event():
+# @app.on_event("startup")
+# async def startup_event():
+#     try:
+#         Base.metadata.create_all(bind=engine)
+#         print("Database tables created successfully")
+#     except Exception as e:
+#         print(f"Error creating database tables: {e}")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
     try:
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully")
     except Exception as e:
         print(f"Error creating database tables: {e}")
+    
+    yield
 
 # Authentication Routes
 @app.post("/register", response_model=UserResponse)
