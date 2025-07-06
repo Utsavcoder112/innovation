@@ -8,16 +8,20 @@
         
         /* Sidebar styling */
         .sidebar {
-            width: 280px;
-            background-color: #2c3e50;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            color: #fff;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-        }
+    width: 280px;                /* Fixed width */
+    min-width: 280px;            /* Prevent shrinking */
+    max-width: 280px;            /* Prevent growing */
+    background-color: #2c3e50;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;      /* Include padding in width */
+}
+
         
         .logo {
             font-size: 28px;
@@ -97,21 +101,30 @@
         
         .action-buttons {
             margin: 15px;
+                display: flex;
+    flex-direction: column;
         }
         
         .action-btn {
-            display: block;
-            background-color: #ff7675;
-            color: white;
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
+                display: block;
+    background-color: #ff7675;
+    color: white;
+    text-align: center;
+    padding: 12px 15px;          /* Ensure adequate padding */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;             /* Ensure readable font size */
+    line-height: 1.2;            /* Proper line height */
+    transition: all 0.3s ease;
+    white-space: nowrap;         /* Prevent text wrapping */
+    min-height: 44px;            /* Minimum touch target size */
+    box-sizing: border-box;
         }
-        
+        .action-btn i {
+    margin-right: 8px;           /* Space between icon and text */
+}
         .donate-btn {
             background-color: #27ae60;
         }
@@ -351,17 +364,17 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
         
-        .food-img {
-            padding: 100px;
-            height: 180px;               /* Set a fixed height */
-            max-height: 180px;           /* Ensure the container does not exceed this height */
-            position: relative;
-            overflow: hidden;
-            background-color: #f1f1f1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.food-img {
+    padding: 0;                  /* Remove excessive padding */
+    height: 180px;               /* Set a fixed height */
+    max-height: 180px;           /* Ensure the container does not exceed this height */
+    position: relative;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
         
         .food-img img {
     width: 100%;           /* Ensures the image fills the width of the container */
@@ -806,10 +819,20 @@
             }
             
             .sidebar {
-                width: 100%;
-                height: auto;
-                position: static;
-            }
+    width: 280px;                /* Fixed width */
+    min-width: 280px;            /* Prevent shrinking */
+    max-width: 280px;            /* Prevent growing */
+    background-color: #2c3e50;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;      /* Include padding in width */
+}
+
             
             .foods-container {
     padding: 30px;

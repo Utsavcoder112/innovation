@@ -387,38 +387,6 @@ async def get_user_info(current_user: User = Depends(get_current_user)):
     }
 
 # Main Routes
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return HTMLResponse(content="""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Annadan - Food Donation Platform</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .container { max-width: 800px; margin: 0 auto; }
-            .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Welcome to Annadan</h1>
-            <p>Food Donation Platform API is running successfully!</p>
-            <p>Available endpoints:</p>
-            <ul>
-                <li><strong>POST /register</strong> - Register a new user</li>
-                <li><strong>POST /login</strong> - Login user</li>
-                <li><strong>GET /user/me</strong> - Get current user info (requires auth)</li>
-                <li><strong>POST /api/donations/</strong> - Create donation (requires auth)</li>
-                <li><strong>GET /api/donations/</strong> - Get all donations (requires auth)</li>
-                <li><strong>GET /docs</strong> - API Documentation</li>
-            </ul>
-            <a href="/docs" class="btn">View API Documentation</a>
-        </div>
-    </body>
-    </html>
-    """)
-
 @app.post("/api/donations/")
 async def create_donation(
     donation: DonationCreate, 

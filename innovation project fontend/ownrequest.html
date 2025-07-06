@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Food Requests - Annadan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./ownrequest.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                Annadan
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <a href="./Donar/donar.html"><i class="fas fa-home"></i> Dashboard</a>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
+                    <div class="dropdown-menu">
+                        <a href="./form.html">Add Food</a>
+                    </div>
+                </div>
+                
+                <div class="menu-item dropdown">
+                    <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
+                    <div class="dropdown-menu">
+                        <a href="./request.html">New Requests</a>
+                        <a href="./ownrequest.html">My requests</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="./form.html" class="action-btn donate-btn"><i class="fas fa-plus-circle"></i> Donate Food</a>
+                <a href="./viewfood.html" class="action-btn request-btn"><i class="fas fa-hand-holding"></i> Request Food</a>
+                <a href="./viewfood.html" class="action-btn view-btn"><i class="fas fa-list-alt"></i> View All Foods</a>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search requests...">
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-role">Food Requester</div>
+                </div>
+                <i class="fas fa-ellipsis-v" style="color: rgba(255, 255, 255, 0.5); cursor: pointer;"></i>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Navbar -->
+            <header class="navbar">
+                <div class="page-title">My Food Requests</div>
+                <div class="navbar-right">
+                    <ul>
+                        <li><a href="./home.html">Home</a></li>
+                        <li><a href="./aboutus.html">About Us</a></li>
+                    </ul>
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </div>
+                    <button id="logoutBtn" class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Requests Container -->
+            <div class="requests-container">
+                <div class="requests-header">
+                    <h1>My Food Requests</h1>
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-list"></i> All Requests
+                        </button>
+                        <button class="filter-btn" data-filter="pending">
+                            <i class="fas fa-clock"></i> Pending
+                        </button>
+                        <button class="filter-btn" data-filter="approved">
+                            <i class="fas fa-check-circle"></i> Approved
+                        </button>
+                        <button class="filter-btn" data-filter="rejected">
+                            <i class="fas fa-times-circle"></i> Rejected
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div id="loader" class="loader" style="display: none;">Loading...</div>
+                
+                <!-- Error Message -->
+                <div id="errorMessage" class="error-message" style="display:none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Unable to load requests</h3>
+                    <p id="errorText">Please try again later.</p>
+                    <button onclick="loadMyRequests()" class="retry-btn">Retry</button>
+                </div>
+                
+                <!-- Requests List -->
+                <div id="requestsList" class="requests-list">
+                    <!-- Request cards will be injected here by JavaScript -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display:none;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No requests found</h3>
+                    <p>You haven't made any food requests yet. Browse available donations to get started!</p>
+                    <a href="./food-listings.html" class="browse-btn">Browse Food Donations</a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-logo">Annadan</div>
+                    <div class="footer-links">
+                        <a href="#">About</a>
+                        <a href="#">Our Mission</a>
+                        <a href="#">How It Works</a>
+                        <a href="#">Contact</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <!-- Edit Request Modal -->
+    <div id="editRequestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit Request</div>
+                <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editRequestForm">
+                    <input type="hidden" id="editRequestId" />
+                    
+                    <div class="form-group">
+                        <label for="editPickupDate">Pickup Date:</label>
+                        <input type="date" id="editPickupDate" class="form-input" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPickupAddress">Pickup Address:</label>
+                        <textarea id="editPickupAddress" class="form-input" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMessage">Message to Donor:</label>
+                        <textarea id="editMessage" class="form-input" rows="4" placeholder="Optional message to the donor..."></textarea>
+                    </div>
+                    
+                    <div id="editError" class="error-text" style="display:none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button type="button" class="save-btn" onclick="saveRequestChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Confirm Delete</div>
+                <span class="close-modal" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this request?</p>
+                <p><strong>Food Item:</strong> <span id="deleteItemName"></span></p>
+                <p><strong>Donor:</strong> <span id="deleteDonorName"></span></p>
+                <p>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="delete-btn" onclick="confirmDeleteRequest()">Delete Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Login Required</div>
+            </div>
+            <div class="modal-body">
+                <p>Please log in to view your requests.</p>
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password">
+                    </div>
+                    <div id="loginError" class="error-text" style="display:none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="login-btn" onclick="performLogin()">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Configuration
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+// Global variables
+let allRequests = [];
+let currentFilter = 'all';
+let currentUser = null;
+let editingRequestId = null;
+let deletingRequestId = null;
+
+// Authentication helper functions
+function getAuthToken() {
+    return localStorage.getItem('access_token');
+}
+
+function setAuthToken(token) {
+    localStorage.setItem('access_token', token);
+}
+
+function removeAuthToken() {
+    localStorage.removeItem('access_token');
+}
+
+function isAuthenticated() {
+    return !!getAuthToken();
+}
+
+// API helper function
+async function apiCall(url, options = {}) {
+    const token = getAuthToken();
+    
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+    };
+    
+    const finalOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+            ...defaultOptions.headers,
+            ...options.headers
+        }
+    };
+    
+    try {
+        const response = await fetch(url, finalOptions);
+        
+        if (response.status === 401) {
+            removeAuthToken();
+            showLoginModal();
+            throw new Error('Authentication required');
+        }
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API call error:', error);
+        throw error;
+    }
+}
+
+// Authentication functions
+async function performLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    if (!email || !password) {
+        errorDiv.textContent = 'Please enter both email and password';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('username', email);
+        formData.append('password', password);
+        
+        const response = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Login failed');
+        }
+        
+        const data = await response.json();
+        setAuthToken(data.access_token);
+        
+        document.getElementById('loginModal').style.display = 'none';
+        
+        await loadUserInfo();
+        await loadMyRequests();
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+async function loadUserInfo() {
+    try {
+        const user = await apiCall(`${API_BASE_URL}/user/me`);
+        currentUser = user;
+        // Update user name in navbar if element exists
+        const userNameElement = document.getElementById('userName');
+        if (userNameElement) {
+            userNameElement.textContent = user.full_name;
+        }
+    } catch (error) {
+        console.error('Error loading user info:', error);
+    }
+}
+
+function logout() {
+    removeAuthToken();
+    currentUser = null;
+    const userNameElement = document.getElementById('userName');
+    if (userNameElement) {
+        userNameElement.textContent = 'Guest';
+    }
+    showLoginModal();
+}
+
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'block';
+    document.getElementById('loginError').style.display = 'none';
+}
+
+// Load user's requests - FIXED API ENDPOINT
+async function loadMyRequests() {
+    if (!isAuthenticated()) {
+        showLoginModal();
+        return;
+    }
+    
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('requestsList').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('errorMessage').style.display = 'none';
+    
+    try {
+        // CORRECTED: Use the correct endpoint from backend
+        const data = await apiCall(`${API_BASE_URL}/api/my-requests/`);
+        allRequests = data;
+        
+        filterAndDisplayRequests();
+        
+    } catch (error) {
+        console.error('Error fetching requests:', error);
+        document.getElementById('errorText').textContent = error.message;
+        document.getElementById('errorMessage').style.display = 'flex';
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('requestsList').style.display = 'block';
+    }
+}
+
+// Filter and display requests
+function filterAndDisplayRequests() {
+    // Check if search input exists before using it
+    const searchInput = document.getElementById('search-input');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    let filteredRequests = allRequests.filter(request => {
+        const matchesSearch = 
+            request.donation_title.toLowerCase().includes(searchTerm) ||
+            request.donor_name.toLowerCase().includes(searchTerm) ||
+            (request.message && request.message.toLowerCase().includes(searchTerm));
+            
+        let matchesFilter = true;
+        
+        if (currentFilter !== 'all') {
+            // Map frontend filter names to backend status values
+            const statusMap = {
+                'pending': 'pending',
+                'approved': 'accepted',  // Backend uses 'accepted', frontend shows 'approved'
+                'rejected': 'rejected'
+            };
+            matchesFilter = request.status === statusMap[currentFilter];
+        }
+        
+        return matchesSearch && matchesFilter;
+    });
+    
+    // Sort by created date (most recent first)
+    filteredRequests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    displayRequests(filteredRequests);
+}
+
+// Display requests
+function displayRequests(requests) {
+    const requestsList = document.getElementById('requestsList');
+    const emptyState = document.getElementById('emptyState');
+    
+    requestsList.innerHTML = '';
+    
+    if (requests.length === 0) {
+        emptyState.style.display = 'flex';
+        requestsList.style.display = 'none';
+    } else {
+        emptyState.style.display = 'none';
+        requestsList.style.display = 'block';
+        
+        requests.forEach(request => {
+            const card = createRequestCard(request);
+            requestsList.appendChild(card);
+        });
+    }
+}
+
+// Create request card - FIXED STATUS MAPPING
+function createRequestCard(request) {
+    const card = document.createElement('div');
+    card.className = `request-card status-${request.status}`;
+    
+    // Format dates
+    const requestDate = new Date(request.created_at);
+    const pickupDate = new Date(request.pickup_date);
+    
+    // Status display - FIXED to match backend status values
+    let statusClass = '';
+    let statusIcon = '';
+    let statusText = '';
+    
+    switch(request.status) {
+        case 'pending':
+            statusClass = 'status-pending';
+            statusIcon = 'fas fa-clock';
+            statusText = 'Pending';
+            break;
+        case 'accepted':  // Backend uses 'accepted'
+            statusClass = 'status-approved';
+            statusIcon = 'fas fa-check-circle';
+            statusText = 'Approved';
+            break;
+        case 'rejected':
+            statusClass = 'status-rejected';
+            statusIcon = 'fas fa-times-circle';
+            statusText = 'Rejected';
+            break;
+        default:
+            statusClass = 'status-unknown';
+            statusIcon = 'fas fa-question-circle';
+            statusText = 'Unknown';
+    }
+    
+    card.innerHTML = `
+        <div class="request-header">
+            <div class="request-title">
+                <h3>${request.donation_title}</h3>
+                <span class="request-status ${statusClass}">
+                    <i class="${statusIcon}"></i> ${statusText}
+                </span>
+            </div>
+            <div class="request-actions">
+                ${request.status === 'pending' ? `
+                    <button class="action-btn edit-btn" onclick="openEditModal('${request.id}')" title="Edit Request">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                ` : ''}
+                <button class="action-btn delete-btn" onclick="openDeleteModal('${request.id}')" title="Delete Request">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="request-details">
+            <div class="detail-row">
+                <span class="detail-label">Donor:</span>
+                <span class="detail-value">${request.donor_name}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Requested On:</span>
+                <span class="detail-value">${requestDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                })}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Pickup Date:</span>
+                <span class="detail-value">${pickupDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                })}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Pickup Address:</span>
+                <span class="detail-value">${request.pickup_address}</span>
+            </div>
+            ${request.message ? `
+                <div class="detail-row">
+                    <span class="detail-label">Message:</span>
+                    <span class="detail-value">${request.message}</span>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="request-footer">
+            <div class="contact-info">
+                <small>Contact donor for more details about pickup arrangements.</small>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Edit request functions - REMOVED (Not supported by backend)
+function openEditModal(requestId) {
+    showNotification('Request editing is not currently supported. Please contact the donor directly for changes.', 'info');
+}
+
+function closeEditModal() {
+    document.getElementById('editRequestModal').style.display = 'none';
+    document.getElementById('editError').style.display = 'none';
+    editingRequestId = null;
+}
+
+// Delete request functions - REMOVED (Not supported by backend)
+function openDeleteModal(requestId) {
+    showNotification('Request deletion is not currently supported. Please contact support if you need to cancel a request.', 'info');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteConfirmModal').style.display = 'none';
+    deletingRequestId = null;
+}
+
+// Notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+        border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        border-radius: 8px;
+        padding: 12px 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: inherit;
+            margin-left: auto;
+        ">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    if (!isAuthenticated()) {
+        showLoginModal();
+    } else {
+        loadUserInfo();
+        loadMyRequests();
+    }
+    
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            currentFilter = this.dataset.filter;
+            filterAndDisplayRequests();
+        });
+    });
+    
+    // Search input (if exists)
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterAndDisplayRequests();
+            }, 300);
+        });
+    }
+    
+    // Login form enter key
+    const loginPasswordInput = document.getElementById('loginPassword');
+    if (loginPasswordInput) {
+        loginPasswordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performLogin();
+            }
+        });
+    }
+    
+    // Sidebar dropdowns (if they exist)
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const dropdown = this.parentElement;
+            dropdown.classList.toggle('active');
+            
+            document.querySelectorAll('.dropdown').forEach(other => {
+                if (other !== dropdown) {
+                    other.classList.remove('active');
+                }
+            });
+        });
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+});
+
+// Modal close handlers
+window.onclick = function(event) {
+    const editModal = document.getElementById('editRequestModal');
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const loginModal = document.getElementById('loginModal');
+    
+    if (event.target === editModal) {
+        closeEditModal();
+    }
+    if (event.target === deleteModal) {
+        closeDeleteModal();
+    }
+    // Don't auto-close login modal
+}
+
+// Escape key handler
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEditModal();
+        closeDeleteModal();
+    }
+});
+
+// Auto-refresh every 30 seconds (optional)
+setInterval(() => {
+    if (isAuthenticated()) {
+        loadMyRequests();
+    }
+}, 30000);
+</script>

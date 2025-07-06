@@ -16,6 +16,175 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        /* Request Confirmation Modal Styles */
+.request-confirmation-modal .modal-content {
+    max-width: 600px;
+    width: 90%;
+}
+
+.confirmation-content {
+    padding: 0;
+}
+
+.confirmation-content .modal-body {
+    padding: 20px;
+}
+
+.confirmation-content .modal-body p {
+    margin-bottom: 15px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.confirmation-content .modal-body h3 {
+    color: #2c3e50;
+    margin: 15px 0;
+    font-size: 1.3em;
+    border-left: 4px solid #3498db;
+    padding-left: 15px;
+}
+
+/* Request Form Styles */
+.request-form {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.request-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.request-form input[type="date"],
+.request-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 15px;
+    background: white;
+}
+
+.request-form input[type="date"]:focus,
+.request-form textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.request-form textarea {
+    resize: vertical;
+    min-height: 80px;
+    max-height: 150px;
+}
+
+.request-form textarea[placeholder] {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.request-form input[type="date"] {
+    cursor: pointer;
+}
+
+/* Modal Footer Buttons */
+.confirmation-content .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #5a6268;
+}
+
+.confirm-request-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+}
+
+.confirm-request-btn:hover {
+    background: linear-gradient(135deg, #2980b9, #21618c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.confirm-request-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .request-confirmation-modal .modal-content {
+        width: 95%;
+        margin: 20px auto;
+    }
+    
+    .confirmation-content .modal-footer {
+        flex-direction: column;
+    }
+    
+    .cancel-btn,
+    .confirm-request-btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .confirm-request-btn {
+        margin-bottom: 0;
+    }
+}
+
+/* Loading state for form submission */
+.confirm-request-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Form validation styles */
+.request-form input:invalid,
+.request-form textarea:invalid {
+    border-color: #e74c3c;
+}
+
+.request-form input:valid,
+.request-form textarea:valid {
+    border-color: #27ae60;
+}
     </style>
 </head>
 <body>
@@ -34,8 +203,6 @@
                     <a href="#" class="dropdown-toggle"><i class="fas fa-list"></i> Food Management</a>
                     <div class="dropdown-menu">
                         <a href="./form.html">Add Food</a>
-                        <a href="#">Manage Listings</a>
-                        <a href="#">Food History</a>
                     </div>
                 </div>
                 
@@ -43,18 +210,8 @@
                     <a href="#" class="dropdown-toggle"><i class="fas fa-hand-holding-heart"></i> Requests</a>
                     <div class="dropdown-menu">
                         <a href="./request.html">New Requests</a>
-                        <a href="#">Completed</a>
-                        <a href="#">Rejected</a>
-                        <a href="#">All Requests</a>
+                        <a href="./ownrequest.html">My Requests</a>
                     </div>
-                </div>
-                
-                <div class="menu-item">
-                    <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
-                </div>
-                
-                <div class="menu-item">
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
                 </div>
             </div>
             
@@ -88,10 +245,7 @@
                 <div class="navbar-right">
                     <ul>
                         <li><a href="./home.html">Home</a></li>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">How It Works</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li><a href="./aboutus.html">About Us</a></li>
                     </ul>
                     <div class="notification-icon">
                         <i class="fas fa-bell"></i>
