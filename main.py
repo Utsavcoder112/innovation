@@ -401,6 +401,7 @@ async def get_user_info(current_user: User = Depends(get_current_user)):
         "created_at": current_user.created_at
     }
 
+
 # Main Routes
 @app.post("/api/donations/")
 async def create_donation(
@@ -870,6 +871,15 @@ async def get_my_requests(
     except Exception as e:
         print(f"Error fetching my requests: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch requests: {str(e)}")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return "<h1>FastAPI is running.</h1>"
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return ""  
 
 app = FastAPI(lifespan=lifespan)
 
