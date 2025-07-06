@@ -66,7 +66,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours to match frontend expectations
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Database configuration
-DATABASE_URL = "mysql+mysqlconnector://root:Arceus123Mewtow@localhost/foodlinker_db"
+# DATABASE_URL = "mysql+mysqlconnector://root:Arceus123Mewtow@localhost/foodlinker_db"
+DATABASE_URL="mysql+mysqlconnector://root:Arceus123Mewtow@your-db-hostname:3306/foodlinker_db"
+
 
 # SQLAlchemy setup
 Base = declarative_base()
