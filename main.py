@@ -875,13 +875,13 @@ async def get_my_requests(
         raise HTTPException(status_code=500, detail=f"Failed to fetch requests: {str(e)}")
 
 
-@app.get("/", response_class=HTMLResponse)
-async def root():
-    return "<h1>FastAPI is running.</h1>"
+# @app.get("/", response_class=HTMLResponse)
+# async def root():
+#     return "<h1>FastAPI is running.</h1>"
 
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return ""  
+# @app.get("/favicon.ico", include_in_schema=False)
+# async def favicon():
+#     return ""  
 
 # Health check endpoint
 @app.get("/health")
