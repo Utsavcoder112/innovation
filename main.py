@@ -50,7 +50,7 @@ app.add_middleware(
         "*"  # Allow all origins for development - remove in production
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "GET"],
     allow_headers=["*"],
 )
 
