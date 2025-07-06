@@ -35,7 +35,7 @@ if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")
 
 # app = FastAPI()
-app = FastAPI
+app = FastAPI()
 
 # CORS middleware - Updated to handle specific frontend requirements
 app.add_middleware(
