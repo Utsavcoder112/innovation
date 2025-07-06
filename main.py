@@ -67,7 +67,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Database configuration
 # DATABASE_URL = "mysql+mysqlconnector://root:Arceus123Mewtow@localhost/foodlinker_db"
-DATABASE_URL="mysql+mysqlconnector://root:Arceus123Mewtow@your-db-hostname:3306/foodlinker_db"
+DATABASE_URL = "postgresql://my_postgres_sql_user:bX8U5jqnfkJGK1e96NP3Fn8nPdjvZzSl@dpg-d1l7jf95pdvs73bkkdl0-a/my_postgres_sql"
 
 
 # SQLAlchemy setup
