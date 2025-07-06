@@ -296,18 +296,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-# Add OPTIONS handler for preflight requests
-@app.options("/{full_path:path}")
-async def options_handler():
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-        }
-    )
-
 # Create tables on app startup
 # @app.on_event("startup")
 # async def startup_event():
@@ -327,6 +315,20 @@ async def lifespan(app: FastAPI):
         print(f"Error creating database tables: {e}")
     
     yield
+
+app = FastAPI(lifespan=lifespan)
+
+# Add OPTIONS handler for preflight requests
+@app.options("/{full_path:path}")
+async def options_handler():
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 # Authentication Routes
 @app.post("/register", response_model=UserResponse)
@@ -880,8 +882,6 @@ async def root():
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return ""  
-
-app = FastAPI(lifespan=lifespan)
 
 # Health check endpoint
 @app.get("/health")
