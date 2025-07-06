@@ -34,8 +34,19 @@ if not os.path.exists("static"):
 if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+    
+    yield
+
+app = FastAPI(lifespan=lifespan)
 # app = FastAPI()
-app = FastAPI()
 
 # CORS middleware - Updated to handle specific frontend requirements
 app.add_middleware(
@@ -305,18 +316,7 @@ class Token(BaseModel):
 #     except Exception as e:
 #         print(f"Error creating database tables: {e}")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup logic
-    try:
-        Base.metadata.create_all(bind=engine)
-        print("Database tables created successfully")
-    except Exception as e:
-        print(f"Error creating database tables: {e}")
-    
-    yield
 
-app = FastAPI(lifespan=lifespan)
 
 # Add OPTIONS handler for preflight requests
 @app.options("/{full_path:path}")
