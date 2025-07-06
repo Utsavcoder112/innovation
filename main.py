@@ -35,7 +35,7 @@ if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")
 
 # app = FastAPI()
-app = FastAPI(lifespan="lifespan")
+app = FastAPI
 
 # CORS middleware - Updated to handle specific frontend requirements
 app.add_middleware(
@@ -870,6 +870,8 @@ async def get_my_requests(
     except Exception as e:
         print(f"Error fetching my requests: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch requests: {str(e)}")
+
+app = FastAPI(lifespan=lifespan)
 
 # Health check endpoint
 @app.get("/health")
